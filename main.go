@@ -36,6 +36,12 @@ func route(
 	return e
 }
 
+func init() {
+	if err := cjungo.LoadEnv(); err != nil {
+		log.Fatalln(err)
+	}
+}
+
 func main() {
 	app, err := cjungo.NewApplication(func(c *dig.Container) error {
 		// 加载日志配置
