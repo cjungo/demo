@@ -8,7 +8,7 @@ import (
 	"github.com/cjungo/cjungo"
 	"github.com/cjungo/cjungo/mid"
 	"github.com/cjungo/demo/controller"
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
@@ -18,6 +18,7 @@ import (
 func provideController(container *dig.Container) error {
 	controllers := []any{
 		controller.NewIndexController,
+		controller.NewLoginController,
 		controller.NewEmployeeController,
 	}
 	for _, c := range controllers {
@@ -32,17 +33,19 @@ func route(
 	e *echo.Echo,
 	logger *zerolog.Logger,
 	indexController *controller.IndexController,
+	loginController *controller.LoginController,
 	employeeController *controller.EmployeeController,
 ) http.Handler {
 	e.GET("/", indexController.Index)
+	e.POST("/login", loginController.Login)
 
 	// api 加了 JWT 权限验证
 	apiGroup := e.Group("/api", mid.NewJwtAuthMiddleware(func(token *jwt.Token) error {
-		if claims, ok := token.Claims.(*jwt.MapClaims); ok {
+		if claims, ok := token.Claims.(jwt.MapClaims); ok {
 			// 根据业务需求，验证凭证里面的信息
 			logger.Info().Str("claims", fmt.Sprintf("%v", claims)).Msg("claims:")
 		} else {
-			return fmt.Errorf("获取凭证失败")
+			return fmt.Errorf("获取凭证失败: %v", token.Claims)
 		}
 		return nil
 	}))
