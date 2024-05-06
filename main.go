@@ -12,22 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
-	"go.uber.org/dig"
 )
-
-func provideController(container *dig.Container) error {
-	controllers := []any{
-		controller.NewIndexController,
-		controller.NewLoginController,
-		controller.NewEmployeeController,
-	}
-	for _, c := range controllers {
-		if err := container.Provide(c); err != nil {
-			return err
-		}
-	}
-	return nil
-}
 
 func route(
 	e *echo.Echo,
@@ -62,18 +47,27 @@ func init() {
 }
 
 func main() {
-	app, err := cjungo.NewApplication(func(c *dig.Container) error {
+	app, err := cjungo.NewApplication(func(c cjungo.DiContainer) error {
 		// 加载日志配置
 		if err := c.Provide(cjungo.LoadLoggerConfFromEnv); err != nil {
 			return err
 		}
+
 		// 加载服务器配置
 		if err := c.Provide(cjungo.LoadHttpServerConfFromEnv); err != nil {
 			return err
 		}
-		if err := provideController(c); err != nil {
+
+		// 注册控制器
+		if err := c.ProvideController([]any{
+			controller.NewIndexController,
+			controller.NewLoginController,
+			controller.NewEmployeeController,
+		}); err != nil {
 			return err
 		}
+
+		// 加载路由
 		if err := c.Provide(route); err != nil {
 			return err
 		}
