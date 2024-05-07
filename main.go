@@ -9,24 +9,23 @@ import (
 	"github.com/cjungo/cjungo/mid"
 	"github.com/cjungo/demo/controller"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
 )
 
 func route(
-	e *echo.Echo,
+	rotuer cjungo.HttpRouter,
 	logger *zerolog.Logger,
 	indexController *controller.IndexController,
 	loginController *controller.LoginController,
 	taskController *controller.TaskController,
 	employeeController *controller.EmployeeController,
 ) http.Handler {
-	e.GET("/", indexController.Index)
-	e.POST("/login", loginController.Login)
+	rotuer.GET("/", indexController.Index)
+	rotuer.POST("/login", loginController.Login)
 
 	// api 加了 JWT 权限验证
-	apiGroup := e.Group("/api", mid.NewJwtAuthMiddleware(func(token *jwt.Token) error {
+	apiGroup := rotuer.Group("/api", mid.NewJwtAuthMiddleware(func(token *jwt.Token) error {
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
 			// 根据业务需求，验证凭证里面的信息
 			logger.Info().Str("claims", fmt.Sprintf("%v", claims)).Msg("claims:")
@@ -40,7 +39,7 @@ func route(
 	employeeGroup := apiGroup.Group("/employee", middleware.Gzip())
 	employeeGroup.GET("/detail", employeeController.Detail)
 
-	return e
+	return rotuer.GetHandler()
 }
 
 func init() {

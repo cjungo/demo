@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/cjungo/cjungo"
-	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
 )
 
@@ -28,7 +27,7 @@ type TaskPushParam struct {
 	Data map[string]any `json:"data" form:"data"`
 }
 
-func (controller *TaskController) Push(ctx echo.Context) error {
+func (controller *TaskController) Push(ctx cjungo.HttpContext) error {
 	param := &TaskPushParam{}
 	if err := ctx.Bind(param); err != nil {
 		return ctx.JSON(
@@ -60,4 +59,3 @@ func (controller *TaskController) Push(ctx echo.Context) error {
 		},
 	)
 }
-

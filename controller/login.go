@@ -7,7 +7,6 @@ import (
 	"github.com/cjungo/cjungo/mid"
 	"github.com/cjungo/demo/misc"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/labstack/echo/v4"
 )
 
 type LoginController struct {
@@ -17,8 +16,7 @@ func NewLoginController() (*LoginController, error) {
 	return &LoginController{}, nil
 }
 
-func (controller *LoginController) Login(c echo.Context) error {
-	ctx := c.(cjungo.HttpContext)
+func (controller *LoginController) Login(ctx cjungo.HttpContext) error {
 	claims := &misc.JwtClaims{
 		UserId:   1,
 		UserName: "aaaa",

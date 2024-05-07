@@ -2,7 +2,6 @@ package controller
 
 import (
 	"github.com/cjungo/cjungo"
-	"github.com/labstack/echo/v4"
 )
 
 type EmployeeController struct {
@@ -12,7 +11,6 @@ func NewEmployeeController() *EmployeeController {
 	return &EmployeeController{}
 }
 
-func (controller *EmployeeController) Detail(c echo.Context) error {
-	ctx := c.(cjungo.HttpContext)
+func (controller *EmployeeController) Detail(ctx cjungo.HttpContext) error {
 	return ctx.Resp("detail")
 }
