@@ -19,6 +19,7 @@ func route(
 	logger *zerolog.Logger,
 	indexController *controller.IndexController,
 	loginController *controller.LoginController,
+	taskController *controller.TaskController,
 	employeeController *controller.EmployeeController,
 ) http.Handler {
 	e.GET("/", indexController.Index)
@@ -34,6 +35,8 @@ func route(
 		}
 		return nil
 	}))
+	taskGroup := apiGroup.Group("/task")
+	taskGroup.POST("/push", taskController.Push)
 	employeeGroup := apiGroup.Group("/employee", middleware.Gzip())
 	employeeGroup.GET("/detail", employeeController.Detail)
 
@@ -58,16 +61,36 @@ func main() {
 			return err
 		}
 
+		// 加载队列配置
+		if err := c.Provide(cjungo.LoadTaskConfFromEnv); err != nil {
+			return err
+		}
+
+		// 注册队列
+		if err := c.Provide(cjungo.NewTaskQueueHandle(func(queue *cjungo.TaskQueue) error {
+			queue.RegisterProcess("action-1", func(param *cjungo.TaskAction) (cjungo.TaskResultMessage, error) {
+				queue.Logger.Info().
+					Str("name", param.Name).
+					Str("id", param.ID).
+					Msg("任务执行完成")
+				return nil, nil
+			})
+			return nil
+		})); err != nil {
+			return err
+		}
+
 		// 注册控制器
 		if err := c.ProvideController([]any{
 			controller.NewIndexController,
 			controller.NewLoginController,
+			controller.NewTaskController,
 			controller.NewEmployeeController,
 		}); err != nil {
 			return err
 		}
 
-		// 加载路由
+		// 注册路由
 		if err := c.Provide(route); err != nil {
 			return err
 		}
