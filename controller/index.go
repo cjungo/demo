@@ -1,8 +1,7 @@
 package controller
 
 import (
-	"net/http"
-
+	"github.com/cjungo/cjungo"
 	"github.com/labstack/echo/v4"
 )
 
@@ -13,12 +12,7 @@ func NewIndexController() *IndexController {
 	return &IndexController{}
 }
 
-func (controller *IndexController) Index(ctx echo.Context) error {
-	return ctx.JSON(
-		http.StatusOK,
-		map[string]any{
-			"code":    0,
-			"message": "Ok",
-		},
-	)
+func (controller *IndexController) Index(c echo.Context) error {
+	ctx := c.(cjungo.HttpContext)
+	return ctx.RespOk()
 }

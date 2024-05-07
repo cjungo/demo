@@ -14,7 +14,7 @@ Content-Type: application/json
 # @name employeeDetial
 GET {{host}}/api/employee/detail HTTP/1.1
 Content-Type: application/json
-Authorization: {{login.response.body.$.token}}
+Authorization: {{login.response.body.$.data}}
 
 {
 

@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"net/http"
 	"time"
 
+	"github.com/cjungo/cjungo"
 	"github.com/cjungo/cjungo/mid"
 	"github.com/cjungo/demo/misc"
 	"github.com/golang-jwt/jwt/v5"
@@ -17,7 +17,8 @@ func NewLoginController() (*LoginController, error) {
 	return &LoginController{}, nil
 }
 
-func (controller *LoginController) Login(ctx echo.Context) error {
+func (controller *LoginController) Login(c echo.Context) error {
+	ctx := c.(cjungo.HttpContext)
 	claims := &misc.JwtClaims{
 		UserId:   1,
 		UserName: "aaaa",
@@ -33,13 +34,7 @@ func (controller *LoginController) Login(ctx echo.Context) error {
 	}
 	token, err := mid.MakeJwtToken(claims)
 	if err != nil {
-		return err
+		return ctx.RespBad(err)
 	}
-	return ctx.JSON(
-		http.StatusOK,
-		map[string]any{
-			"code":  0,
-			"token": token,
-		},
-	)
+	return ctx.Resp(token)
 }
