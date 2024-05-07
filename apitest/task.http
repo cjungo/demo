@@ -25,3 +25,9 @@ Authorization: {{login.response.body.$.data}}
         "other": "xxxx"
     }
 }
+
+
+###
+# @name taskQuery
+GET {{host}}/api/task/query?id={{taskPush.response.body.$.data}} HTTP/1.1
+Authorization: {{login.response.body.$.data}}

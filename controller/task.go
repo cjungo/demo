@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"net/http"
-
 	"github.com/cjungo/cjungo"
 	"github.com/rs/zerolog"
 )
@@ -30,32 +28,25 @@ type TaskPushParam struct {
 func (controller *TaskController) Push(ctx cjungo.HttpContext) error {
 	param := &TaskPushParam{}
 	if err := ctx.Bind(param); err != nil {
-		return ctx.JSON(
-			http.StatusBadRequest,
-			map[string]any{
-				"code":    -1,
-				"message": "请求参数有误",
-			},
-		)
+		return ctx.RespBad(err)
 	}
 
 	if id, err := controller.queue.PushTask(param.Name, param.Data); err != nil {
-		return ctx.JSON(
-			http.StatusBadRequest,
-			map[string]any{
-				"code":    -1,
-				"message": "请求参数有误",
-				"id":      id,
-				"error":   err,
-			},
-		)
+		return ctx.RespBadF("任务分发失败 ID: %s %v", id, err)
+	} else {
+		return ctx.Resp(id)
 	}
-
-	return ctx.JSON(
-		http.StatusOK,
-		map[string]any{
-			"code":    0,
-			"message": "Ok",
-		},
-	)
 }
+
+func (controller *TaskController) Query(ctx cjungo.HttpContext) error {
+	id := ctx.QueryParam("id")
+	controller.logger.Info().
+		Str("ID", id).
+		Msg("任务")
+	if result, err := controller.queue.QueryTask(id); err != nil {
+		return ctx.RespBad(err)
+	} else {
+		return ctx.Resp(result)
+	}
+}
+
