@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/cjungo/cjungo"
+	"github.com/cjungo/cjungo/db"
 	"github.com/cjungo/cjungo/mid"
 	"github.com/cjungo/demo/controller"
 	"github.com/golang-jwt/jwt/v5"
@@ -20,6 +21,7 @@ func route(
 	loginController *controller.LoginController,
 	taskController *controller.TaskController,
 	employeeController *controller.EmployeeController,
+	productController *controller.ProductController,
 ) http.Handler {
 	router.GET("/", indexController.Index)
 	router.POST("/login", loginController.Login)
@@ -44,6 +46,10 @@ func route(
 	employeeGroup := apiGroup.Group("/employee", middleware.Gzip())
 	employeeGroup.GET("/detail", employeeController.Detail)
 
+	// product
+	productGroup := apiGroup.Group("/product")
+	productGroup.GET("/detail", productController.Detail)
+
 	return router.GetHandler()
 }
 
@@ -60,6 +66,14 @@ func main() {
 			return err
 		}
 
+		// 加载数据库配置
+		if err := c.Provide(db.LoadMySqlConfFormEnv); err != nil {
+			return err
+		}
+		if err := c.Provide(db.LoadSqliteConfFormEnv); err != nil {
+			return err
+		}
+
 		// 加载服务器配置
 		if err := c.Provide(cjungo.LoadHttpServerConfFromEnv); err != nil {
 			return err
@@ -67,6 +81,14 @@ func main() {
 
 		// 加载队列配置
 		if err := c.Provide(cjungo.LoadTaskConfFromEnv); err != nil {
+			return err
+		}
+
+		// 注册数据库
+		if err := c.Provide(db.NewMySqlHandle(func(ms *db.MySql) error { return nil })); err != nil {
+			return err
+		}
+		if err := c.Provide(db.NewSqliteHandle(func(s *db.Sqlite) error { return nil })); err != nil {
 			return err
 		}
 
@@ -90,6 +112,7 @@ func main() {
 			controller.NewLoginController,
 			controller.NewTaskController,
 			controller.NewEmployeeController,
+			controller.NewProductController,
 		}); err != nil {
 			return err
 		}

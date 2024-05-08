@@ -1,0 +1,22 @@
+@host = http://127.0.0.1:12345
+
+
+###
+# @name login
+POST {{host}}/login HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "",
+    "password": ""
+}
+
+###
+# @name productDetial
+GET {{host}}/api/product/detail HTTP/1.1
+Content-Type: application/json
+Authorization: {{login.response.body.$.data}}
+
+{
+
+}
