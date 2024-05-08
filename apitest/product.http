@@ -12,11 +12,18 @@ Content-Type: application/json
 }
 
 ###
-# @name productDetial
-GET {{host}}/api/product/detail HTTP/1.1
+# @name producAdd
+PUT {{host}}/api/product/add HTTP/1.1
 Content-Type: application/json
 Authorization: {{login.response.body.$.data}}
 
 {
-
+    "number": "2004",
+    "fullname": "名字AAAA",
+    "shortname": "AA"
 }
+
+###
+# @name productDetial
+GET {{host}}/api/product/detail?id=4 HTTP/1.1
+Authorization: {{login.response.body.$.data}}

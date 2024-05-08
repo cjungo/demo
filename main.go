@@ -9,6 +9,7 @@ import (
 	"github.com/cjungo/cjungo/db"
 	"github.com/cjungo/cjungo/mid"
 	"github.com/cjungo/demo/controller"
+	"github.com/cjungo/demo/entity"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
@@ -48,6 +49,7 @@ func route(
 
 	// product
 	productGroup := apiGroup.Group("/product")
+	productGroup.PUT("/add", productController.Add)
 	productGroup.GET("/detail", productController.Detail)
 
 	return router.GetHandler()
@@ -85,10 +87,13 @@ func main() {
 		}
 
 		// 注册数据库
-		if err := c.Provide(db.NewMySqlHandle(func(ms *db.MySql) error { return nil })); err != nil {
+		if err := c.Provide(db.NewMySqlHandle(func(mysql *db.MySql) error {
+			entity.Use(mysql.DB)
+			return nil
+		})); err != nil {
 			return err
 		}
-		if err := c.Provide(db.NewSqliteHandle(func(s *db.Sqlite) error { return nil })); err != nil {
+		if err := c.Provide(db.NewSqliteHandle(func(sqlite *db.Sqlite) error { return nil })); err != nil {
 			return err
 		}
 
