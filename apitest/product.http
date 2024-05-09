@@ -18,7 +18,7 @@ Content-Type: application/json
 Authorization: {{login.response.body.$.data}}
 
 {
-    "number": "2008",
+    "number": "2011",
     "fullname": "名字AAAA",
     "shortname": "AA"
 }
@@ -27,3 +27,16 @@ Authorization: {{login.response.body.$.data}}
 # @name productDetial
 GET {{host}}/api/product/detail?id=4 HTTP/1.1
 Authorization: {{login.response.body.$.data}}
+
+###
+# @name productEdit
+POST {{host}}/api/product/edit HTTP/1.1
+Content-Type: application/json
+Authorization: {{login.response.body.$.data}}
+
+{
+    "id": 12,
+    "number": "2020",
+    "fullname": "名字AAAA565612",
+    "shortname": "AA"
+}

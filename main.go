@@ -51,6 +51,7 @@ func route(
 	productGroup := apiGroup.Group("/product")
 	productGroup.PUT("/add", productController.Add)
 	productGroup.GET("/detail", productController.Detail)
+	productGroup.POST("/edit", productController.Edit)
 
 	return router.GetHandler()
 }
