@@ -6,16 +6,38 @@ POST {{host}}/login HTTP/1.1
 Content-Type: application/json
 
 {
-    "username": "",
-    "password": ""
+    "username": "admin",
+    "password": "admin"
 }
 
 ###
-# @name employeeDetial
-GET {{host}}/api/employee/detail HTTP/1.1
+# @name employeeAdd
+PUT {{host}}/api/employee/add HTTP/1.1
 Content-Type: application/json
 Authorization: {{login.response.body.$.data}}
 
 {
-
+    "username": "1213434252",
+    "password": "324324",
+    "nickname": "用户啊32",
+    "permissions": [1,2,3]
 }
+
+###
+# @name employeeEdit
+POST {{host}}/api/employee/edit HTTP/1.1
+Content-Type: application/json
+Authorization: {{login.response.body.$.data}}
+
+{
+    "id": 12,
+    "username": "12134SS1",
+    "password": "324324",
+    "nickname": "用户啊32",
+    "permissions": [1,2,3,4,5]
+}
+
+###
+# @name employeeDetial
+GET {{host}}/api/employee/detail?id=12 HTTP/1.1
+Authorization: {{login.response.body.$.data}}

@@ -46,7 +46,9 @@ func route(
 
 	// employee
 	employeeGroup := apiGroup.Group("/employee", middleware.Gzip())
+	employeeGroup.PUT("/add", employeeController.Add)
 	employeeGroup.GET("/detail", employeeController.Detail)
+	employeeGroup.POST("/edit", employeeController.Edit)
 
 	// product
 	productGroup := apiGroup.Group("/product")
