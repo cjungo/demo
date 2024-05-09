@@ -10,6 +10,7 @@ import (
 	"github.com/cjungo/cjungo/mid"
 	"github.com/cjungo/demo/controller"
 	"github.com/cjungo/demo/entity"
+	localEntity "github.com/cjungo/demo/local/entity"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
@@ -94,7 +95,10 @@ func main() {
 		})); err != nil {
 			return err
 		}
-		if err := c.Provide(db.NewSqliteHandle(func(sqlite *db.Sqlite) error { return nil })); err != nil {
+		if err := c.Provide(db.NewSqliteHandle(func(sqlite *db.Sqlite) error {
+			localEntity.Use(sqlite.DB)
+			return nil
+		})); err != nil {
 			return err
 		}
 
