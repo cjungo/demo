@@ -11,6 +11,7 @@ import (
 	"github.com/cjungo/demo/controller"
 	"github.com/cjungo/demo/entity"
 	localEntity "github.com/cjungo/demo/local/entity"
+	"github.com/cjungo/demo/misc"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
@@ -19,6 +20,7 @@ import (
 func route(
 	router cjungo.HttpRouter,
 	logger *zerolog.Logger,
+	permitManager *mid.PermitManager[int32],
 	indexController *controller.IndexController,
 	loginController *controller.LoginController,
 	taskController *controller.TaskController,
@@ -29,13 +31,8 @@ func route(
 	router.POST("/login", loginController.Login)
 
 	// api 加了 JWT 权限验证
-	apiGroup := router.Group("/api", mid.NewJwtAuthMiddleware(func(token *jwt.Token) error {
-		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			// 根据业务需求，验证凭证里面的信息
-			logger.Info().Str("claims", fmt.Sprintf("%v", claims)).Msg("claims:")
-		} else {
-			return fmt.Errorf("获取凭证失败: %v", token.Claims)
-		}
+	apiGroup := router.Group("/api", mid.NewJwtAuthMiddleware(func() *misc.JwtClaims { return &misc.JwtClaims{} }, func(token *jwt.Token, claims *misc.JwtClaims) error {
+		logger.Info().Str("claims", fmt.Sprintf("%v", claims)).Msg("claims")
 		return nil
 	}))
 
@@ -53,7 +50,7 @@ func route(
 	// product
 	productGroup := apiGroup.Group("/product")
 	productGroup.PUT("/add", productController.Add)
-	productGroup.GET("/detail", productController.Detail)
+	productGroup.GET("/detail", productController.Detail, permitManager.Permit(1, 2))
 	productGroup.POST("/edit", productController.Edit)
 
 	return router.GetHandler()
@@ -87,6 +84,17 @@ func main() {
 
 		// 加载队列配置
 		if err := c.Provide(cjungo.LoadTaskConfFromEnv); err != nil {
+			return err
+		}
+
+		// 注册权限管理器
+		if err := c.Provide(mid.NewPermitManager(func(ctx cjungo.HttpContext) ([]int32, error) {
+			claims := &misc.JwtClaims{}
+			if _, err := mid.ParseJwtToken(ctx, claims); err != nil {
+				return nil, err
+			}
+			return claims.EmployeePermissions, nil
+		})); err != nil {
 			return err
 		}
 
