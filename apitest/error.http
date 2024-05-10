@@ -1,0 +1,6 @@
+@host = http://127.0.0.1:12345
+
+###
+# @name error404
+# 没有的路径，看报错信息。
+GET {{host}}/not_found_path HTTP/1.1

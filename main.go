@@ -40,7 +40,7 @@ func route(
 	}))
 
 	// task
-	taskGroup := apiGroup.Group("/task")
+	taskGroup := apiGroup.Group("/task", middleware.CORS())
 	taskGroup.POST("/push", taskController.Push)
 	taskGroup.GET("/query", taskController.Query)
 
