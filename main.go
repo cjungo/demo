@@ -1,18 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/cjungo/cjungo"
 	"github.com/cjungo/cjungo/db"
+	"github.com/cjungo/cjungo/ext"
 	"github.com/cjungo/cjungo/mid"
 	"github.com/cjungo/demo/controller"
 	"github.com/cjungo/demo/entity"
 	localEntity "github.com/cjungo/demo/local/entity"
 	"github.com/cjungo/demo/misc"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
 )
@@ -30,11 +29,7 @@ func route(
 	router.GET("/", indexController.Index)
 	router.POST("/login", loginController.Login)
 
-	// api 加了 JWT 权限验证
-	apiGroup := router.Group("/api", mid.NewJwtAuthMiddleware(func() *misc.JwtClaims { return &misc.JwtClaims{} }, func(token *jwt.Token, claims *misc.JwtClaims) error {
-		logger.Info().Str("claims", fmt.Sprintf("%v", claims)).Msg("claims")
-		return nil
-	}))
+	apiGroup := router.Group("/api")
 
 	// task
 	taskGroup := apiGroup.Group("/task", middleware.CORS())
@@ -50,7 +45,7 @@ func route(
 	// product
 	productGroup := apiGroup.Group("/product")
 	productGroup.PUT("/add", productController.Add)
-	productGroup.GET("/detail", productController.Detail, permitManager.Permit(1, 2))
+	productGroup.GET("/detail", productController.Detail, permitManager.Permit(1, 2, 4))
 	productGroup.POST("/edit", productController.Edit)
 
 	return router.GetHandler()
@@ -90,7 +85,7 @@ func main() {
 		// 注册权限管理器
 		if err := c.Provide(mid.NewPermitManager(func(ctx cjungo.HttpContext) ([]int32, error) {
 			claims := &misc.JwtClaims{}
-			if _, err := mid.ParseJwtToken(ctx, claims); err != nil {
+			if _, err := ext.ParseJwtToken(ctx, claims); err != nil {
 				return nil, err
 			}
 			return claims.EmployeePermissions, nil

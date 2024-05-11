@@ -5,7 +5,7 @@ import (
 
 	"github.com/cjungo/cjungo"
 	"github.com/cjungo/cjungo/db"
-	"github.com/cjungo/cjungo/mid"
+	"github.com/cjungo/cjungo/ext"
 	"github.com/cjungo/demo/misc"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/rs/zerolog"
@@ -76,7 +76,7 @@ func (controller *LoginController) Login(ctx cjungo.HttpContext) error {
 			Audience:  []string{"somebody_else"},
 		},
 	}
-	token, err := mid.MakeJwtToken(claims)
+	token, err := ext.MakeJwtToken(claims)
 	if err != nil {
 		return ctx.RespBad(err)
 	}
