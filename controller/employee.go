@@ -43,7 +43,7 @@ func (controller *EmployeeController) Add(ctx cjungo.HttpContext) error {
 		for i, pid := range param.Permissions {
 			permissions[i] = model.CjEmployeePermission{
 				EmployeeID:   param.ID,
-				PermissionID: &pid,
+				PermissionID: pid,
 			}
 		}
 
@@ -80,7 +80,7 @@ func (controller *EmployeeController) Edit(ctx cjungo.HttpContext) error {
 		for i, pid := range param.Permissions {
 			permissions[i] = model.CjEmployeePermission{
 				EmployeeID:   param.ID,
-				PermissionID: &pid,
+				PermissionID: pid,
 			}
 		}
 		if err := tx.CreateInBatches(permissions, 100).Error; err != nil {

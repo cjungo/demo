@@ -48,7 +48,7 @@ func (controller *LoginController) Login(ctx cjungo.HttpContext) error {
 	}
 	controller.logger.Info().Any("employee", employee).Msg("登录")
 
-	if employee.ID == nil {
+	if employee.ID == 0 {
 		return ctx.RespBad("无效的账号或密码")
 	}
 
@@ -63,9 +63,11 @@ func (controller *LoginController) Login(ctx cjungo.HttpContext) error {
 	controller.logger.Info().Any("permissions", permissions).Msg("权限")
 
 	claims := &misc.JwtClaims{
-		EmployeeId:          *employee.ID,
-		EmployeeNickname:    *employee.Nickname,
-		EmployeePermissions: permissions,
+		EmployeeToken: misc.EmployeeToken{
+			EmployeeId:          employee.ID,
+			EmployeeNickname:    employee.Nickname,
+			EmployeePermissions: permissions,
+		},
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

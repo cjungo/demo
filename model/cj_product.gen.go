@@ -4,15 +4,25 @@
 
 package model
 
+import (
+	"time"
+)
+
 const TableNameCjProduct = "cj_product"
 
 // CjProduct 产品
 type CjProduct struct {
-	ID        uint32  `gorm:"column:id;type:int unsigned;primaryKey;autoIncrement:true" json:"id"`
-	Number    string  `gorm:"column:number;type:varchar(15);not null;uniqueIndex:NUMBER_UNIQUE,priority:1;comment:编号" json:"number"` // 编号
-	Shortname *string `gorm:"column:shortname;type:varchar(60)" json:"shortname"`
-	Fullname  *string `gorm:"column:fullname;type:text" json:"fullname"`
-	IsRemoved uint32  `gorm:"column:is_removed;type:tinyint unsigned;not null" json:"is_removed"`
+	ID        uint32     `gorm:"column:id;type:int unsigned;primaryKey;autoIncrement:true" json:"id"`
+	Number    string     `gorm:"column:number;type:varchar(15);not null;uniqueIndex:NUMBER_UNIQUE,priority:1;comment:编号" json:"number"` // 编号
+	Shortname *string    `gorm:"column:shortname;type:varchar(60)" json:"shortname"`
+	Fullname  *string    `gorm:"column:fullname;type:text" json:"fullname"`
+	CreateBy  int32      `gorm:"column:create_by;type:int;not null;comment:创建者" json:"create_by"`                                 // 创建者
+	CreateAt  time.Time  `gorm:"column:create_at;type:datetime;not null;default:CURRENT_TIMESTAMP;comment:创建时间" json:"create_at"` // 创建时间
+	UpdateBy  int32      `gorm:"column:update_by;type:int;not null;comment:修改者" json:"update_by"`                                 // 修改者
+	UpdateAt  time.Time  `gorm:"column:update_at;type:datetime;not null;default:CURRENT_TIMESTAMP;comment:修改时间" json:"update_at"` // 修改时间
+	RemoveBy  uint32     `gorm:"column:remove_by;type:int unsigned;not null;comment:删除者" json:"remove_by"`                        // 删除者
+	RemoveAt  *time.Time `gorm:"column:remove_at;type:datetime;comment:删除时间" json:"remove_at"`                                    // 删除时间
+	IsRemoved uint32     `gorm:"column:is_removed;type:tinyint unsigned;not null" json:"is_removed"`
 }
 
 // TableName CjProduct's table name

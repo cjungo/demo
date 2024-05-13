@@ -4,14 +4,24 @@
 
 package model
 
+import (
+	"time"
+)
+
 const TableNameCjEmployee = "cj_employee"
 
 // CjEmployee mapped from table <cj_employee>
 type CjEmployee struct {
-	ID       *int32  `gorm:"column:id;type:INTEGER;primaryKey" json:"id"`
-	Username string  `gorm:"column:username;type:STRING;not null" json:"username"`
-	Password *string `gorm:"column:password;type:STRING" json:"password"`
-	Nickname *string `gorm:"column:nickname;type:STRING" json:"nickname"`
+	ID       int32      `gorm:"column:id;type:INTEGER;primaryKey" json:"id"`
+	Username string     `gorm:"column:username;type:text;not null" json:"username"`
+	Password string     `gorm:"column:password;type:text;not null" json:"password"`
+	Nickname string     `gorm:"column:nickname;type:text;not null" json:"nickname"`
+	CreateBy int32      `gorm:"column:create_by;type:INTEGER;not null" json:"create_by"`
+	CreateAt time.Time  `gorm:"column:create_at;type:DATETIME;not null" json:"create_at"`
+	UpdateBy int32      `gorm:"column:update_by;type:INTEGER;not null" json:"update_by"`
+	UpdateAt time.Time  `gorm:"column:update_at;type:DATETIME;not null" json:"update_at"`
+	RemoveBy int32      `gorm:"column:remove_by;type:INTEGER;not null" json:"remove_by"`
+	RemoveAt *time.Time `gorm:"column:remove_at;type:DATETIME" json:"remove_at"`
 }
 
 // TableName CjEmployee's table name

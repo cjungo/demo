@@ -20,6 +20,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		db:                   db,
 		CjEmployee:           newCjEmployee(db, opts...),
 		CjEmployeePermission: newCjEmployeePermission(db, opts...),
+		CjOperation:          newCjOperation(db, opts...),
 		CjPermission:         newCjPermission(db, opts...),
 	}
 }
@@ -29,6 +30,7 @@ type Query struct {
 
 	CjEmployee           cjEmployee
 	CjEmployeePermission cjEmployeePermission
+	CjOperation          cjOperation
 	CjPermission         cjPermission
 }
 
@@ -39,6 +41,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		db:                   db,
 		CjEmployee:           q.CjEmployee.clone(db),
 		CjEmployeePermission: q.CjEmployeePermission.clone(db),
+		CjOperation:          q.CjOperation.clone(db),
 		CjPermission:         q.CjPermission.clone(db),
 	}
 }
@@ -56,6 +59,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		db:                   db,
 		CjEmployee:           q.CjEmployee.replaceDB(db),
 		CjEmployeePermission: q.CjEmployeePermission.replaceDB(db),
+		CjOperation:          q.CjOperation.replaceDB(db),
 		CjPermission:         q.CjPermission.replaceDB(db),
 	}
 }
@@ -63,6 +67,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 type queryCtx struct {
 	CjEmployee           *cjEmployeeDo
 	CjEmployeePermission *cjEmployeePermissionDo
+	CjOperation          *cjOperationDo
 	CjPermission         *cjPermissionDo
 }
 
@@ -70,6 +75,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
 		CjEmployee:           q.CjEmployee.WithContext(ctx),
 		CjEmployeePermission: q.CjEmployeePermission.WithContext(ctx),
+		CjOperation:          q.CjOperation.WithContext(ctx),
 		CjPermission:         q.CjPermission.WithContext(ctx),
 	}
 }

@@ -8,10 +8,10 @@ const TableNameCjPermission = "cj_permission"
 
 // CjPermission mapped from table <cj_permission>
 type CjPermission struct {
-	ID       *int32  `gorm:"column:id;type:INTEGER;primaryKey" json:"id"`
-	ParentID *int32  `gorm:"column:parent_id;type:INTEGER" json:"parent_id"`
-	Tag      *string `gorm:"column:tag;type:STRING" json:"tag"`
-	Name     *string `gorm:"column:name;type:STRING" json:"name"`
+	ID       int32  `gorm:"column:id;type:INTEGER;primaryKey" json:"id"`
+	ParentID int32  `gorm:"column:parent_id;type:INTEGER;not null" json:"parent_id"`
+	Tag      string `gorm:"column:tag;type:text;not null" json:"tag"`
+	Name     string `gorm:"column:name;type:text;not null" json:"name"`
 }
 
 // TableName CjPermission's table name

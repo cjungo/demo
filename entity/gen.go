@@ -17,26 +17,23 @@ import (
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:                 db,
-		CjProduct:          newCjProduct(db, opts...),
-		CjProductOperation: newCjProductOperation(db, opts...),
+		db:        db,
+		CjProduct: newCjProduct(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	CjProduct          cjProduct
-	CjProductOperation cjProductOperation
+	CjProduct cjProduct
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:                 db,
-		CjProduct:          q.CjProduct.clone(db),
-		CjProductOperation: q.CjProductOperation.clone(db),
+		db:        db,
+		CjProduct: q.CjProduct.clone(db),
 	}
 }
 
@@ -50,21 +47,18 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:                 db,
-		CjProduct:          q.CjProduct.replaceDB(db),
-		CjProductOperation: q.CjProductOperation.replaceDB(db),
+		db:        db,
+		CjProduct: q.CjProduct.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	CjProduct          *cjProductDo
-	CjProductOperation *cjProductOperationDo
+	CjProduct *cjProductDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		CjProduct:          q.CjProduct.WithContext(ctx),
-		CjProductOperation: q.CjProductOperation.WithContext(ctx),
+		CjProduct: q.CjProduct.WithContext(ctx),
 	}
 }
 

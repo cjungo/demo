@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/cjungo/cjungo"
 	"github.com/cjungo/cjungo/db"
@@ -11,15 +12,18 @@ import (
 	"github.com/cjungo/demo/controller"
 	"github.com/cjungo/demo/entity"
 	localEntity "github.com/cjungo/demo/local/entity"
+	localModel "github.com/cjungo/demo/local/model"
 	"github.com/cjungo/demo/misc"
+	"github.com/cjungo/demo/model"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
+	"gorm.io/gorm"
 )
 
 func route(
 	router cjungo.HttpRouter,
 	logger *zerolog.Logger,
-	permitManager *mid.PermitManager[int32],
+	permitManager *mid.PermitManager[int32, misc.EmployeeToken],
 	indexController *controller.IndexController,
 	loginController *controller.LoginController,
 	taskController *controller.TaskController,
@@ -44,9 +48,9 @@ func route(
 
 	// product
 	productGroup := apiGroup.Group("/product")
-	productGroup.PUT("/add", productController.Add)
+	productGroup.PUT("/add", productController.Add, permitManager.Permit(1))
 	productGroup.GET("/detail", productController.Detail, permitManager.Permit(1, 2, 4))
-	productGroup.POST("/edit", productController.Edit)
+	productGroup.POST("/edit", productController.Edit, permitManager.Permit(1))
 
 	return router.GetHandler()
 }
@@ -83,12 +87,12 @@ func main() {
 		}
 
 		// 注册权限管理器
-		if err := c.Provide(mid.NewPermitManager(func(ctx cjungo.HttpContext) ([]int32, error) {
+		if err := c.Provide(mid.NewPermitManager(func(ctx cjungo.HttpContext) ([]int32, misc.EmployeeToken, error) {
 			claims := &misc.JwtClaims{}
 			if _, err := ext.ParseJwtToken(ctx, claims); err != nil {
-				return nil, err
+				return nil, claims.EmployeeToken, err
 			}
-			return claims.EmployeePermissions, nil
+			return claims.EmployeePermissions, claims.EmployeeToken, nil
 		})); err != nil {
 			return err
 		}
@@ -96,13 +100,35 @@ func main() {
 		// 注册数据库
 		if err := c.Provide(db.NewMySqlHandle(func(mysql *db.MySql) error {
 			entity.Use(mysql.DB)
+			mysql.AutoMigrate(&model.CjProduct{})
 			return nil
 		})); err != nil {
 			return err
 		}
 		if err := c.Provide(db.NewSqliteHandle(func(sqlite *db.Sqlite) error {
 			localEntity.Use(sqlite.DB)
-			return nil
+			sqlite.AutoMigrate(
+				&localModel.CjPermission{},
+				&localModel.CjOperation{},
+				&localModel.CjEmployee{},
+				&localModel.CjEmployeePermission{},
+			)
+			return sqlite.Transaction(func(tx *gorm.DB) error {
+				now := time.Now()
+				admin := &localModel.CjEmployee{
+					ID:       1,
+					Username: "admin",
+					Password: "admin",
+					Nickname: "admin",
+					CreateBy: 0,
+					CreateAt: now,
+					UpdateBy: 0,
+					UpdateAt: now,
+				}
+				tx.Save(admin)
+
+				return nil
+			})
 		})); err != nil {
 			return err
 		}

@@ -31,6 +31,12 @@ func newCjEmployee(db *gorm.DB, opts ...gen.DOOption) cjEmployee {
 	_cjEmployee.Username = field.NewString(tableName, "username")
 	_cjEmployee.Password = field.NewString(tableName, "password")
 	_cjEmployee.Nickname = field.NewString(tableName, "nickname")
+	_cjEmployee.CreateBy = field.NewInt32(tableName, "create_by")
+	_cjEmployee.CreateAt = field.NewTime(tableName, "create_at")
+	_cjEmployee.UpdateBy = field.NewInt32(tableName, "update_by")
+	_cjEmployee.UpdateAt = field.NewTime(tableName, "update_at")
+	_cjEmployee.RemoveBy = field.NewInt32(tableName, "remove_by")
+	_cjEmployee.RemoveAt = field.NewTime(tableName, "remove_at")
 
 	_cjEmployee.fillFieldMap()
 
@@ -45,6 +51,12 @@ type cjEmployee struct {
 	Username field.String
 	Password field.String
 	Nickname field.String
+	CreateBy field.Int32
+	CreateAt field.Time
+	UpdateBy field.Int32
+	UpdateAt field.Time
+	RemoveBy field.Int32
+	RemoveAt field.Time
 
 	fieldMap map[string]field.Expr
 }
@@ -65,6 +77,12 @@ func (c *cjEmployee) updateTableName(table string) *cjEmployee {
 	c.Username = field.NewString(table, "username")
 	c.Password = field.NewString(table, "password")
 	c.Nickname = field.NewString(table, "nickname")
+	c.CreateBy = field.NewInt32(table, "create_by")
+	c.CreateAt = field.NewTime(table, "create_at")
+	c.UpdateBy = field.NewInt32(table, "update_by")
+	c.UpdateAt = field.NewTime(table, "update_at")
+	c.RemoveBy = field.NewInt32(table, "remove_by")
+	c.RemoveAt = field.NewTime(table, "remove_at")
 
 	c.fillFieldMap()
 
@@ -91,11 +109,17 @@ func (c *cjEmployee) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (c *cjEmployee) fillFieldMap() {
-	c.fieldMap = make(map[string]field.Expr, 4)
+	c.fieldMap = make(map[string]field.Expr, 10)
 	c.fieldMap["id"] = c.ID
 	c.fieldMap["username"] = c.Username
 	c.fieldMap["password"] = c.Password
 	c.fieldMap["nickname"] = c.Nickname
+	c.fieldMap["create_by"] = c.CreateBy
+	c.fieldMap["create_at"] = c.CreateAt
+	c.fieldMap["update_by"] = c.UpdateBy
+	c.fieldMap["update_at"] = c.UpdateAt
+	c.fieldMap["remove_by"] = c.RemoveBy
+	c.fieldMap["remove_at"] = c.RemoveAt
 }
 
 func (c cjEmployee) clone(db *gorm.DB) cjEmployee {

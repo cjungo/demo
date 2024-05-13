@@ -31,6 +31,12 @@ func newCjProduct(db *gorm.DB, opts ...gen.DOOption) cjProduct {
 	_cjProduct.Number = field.NewString(tableName, "number")
 	_cjProduct.Shortname = field.NewString(tableName, "shortname")
 	_cjProduct.Fullname = field.NewString(tableName, "fullname")
+	_cjProduct.CreateBy = field.NewInt32(tableName, "create_by")
+	_cjProduct.CreateAt = field.NewTime(tableName, "create_at")
+	_cjProduct.UpdateBy = field.NewInt32(tableName, "update_by")
+	_cjProduct.UpdateAt = field.NewTime(tableName, "update_at")
+	_cjProduct.RemoveBy = field.NewUint32(tableName, "remove_by")
+	_cjProduct.RemoveAt = field.NewTime(tableName, "remove_at")
 	_cjProduct.IsRemoved = field.NewUint32(tableName, "is_removed")
 
 	_cjProduct.fillFieldMap()
@@ -47,6 +53,12 @@ type cjProduct struct {
 	Number    field.String // 编号
 	Shortname field.String
 	Fullname  field.String
+	CreateBy  field.Int32  // 创建者
+	CreateAt  field.Time   // 创建时间
+	UpdateBy  field.Int32  // 修改者
+	UpdateAt  field.Time   // 修改时间
+	RemoveBy  field.Uint32 // 删除者
+	RemoveAt  field.Time   // 删除时间
 	IsRemoved field.Uint32
 
 	fieldMap map[string]field.Expr
@@ -68,6 +80,12 @@ func (c *cjProduct) updateTableName(table string) *cjProduct {
 	c.Number = field.NewString(table, "number")
 	c.Shortname = field.NewString(table, "shortname")
 	c.Fullname = field.NewString(table, "fullname")
+	c.CreateBy = field.NewInt32(table, "create_by")
+	c.CreateAt = field.NewTime(table, "create_at")
+	c.UpdateBy = field.NewInt32(table, "update_by")
+	c.UpdateAt = field.NewTime(table, "update_at")
+	c.RemoveBy = field.NewUint32(table, "remove_by")
+	c.RemoveAt = field.NewTime(table, "remove_at")
 	c.IsRemoved = field.NewUint32(table, "is_removed")
 
 	c.fillFieldMap()
@@ -95,11 +113,17 @@ func (c *cjProduct) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (c *cjProduct) fillFieldMap() {
-	c.fieldMap = make(map[string]field.Expr, 5)
+	c.fieldMap = make(map[string]field.Expr, 11)
 	c.fieldMap["id"] = c.ID
 	c.fieldMap["number"] = c.Number
 	c.fieldMap["shortname"] = c.Shortname
 	c.fieldMap["fullname"] = c.Fullname
+	c.fieldMap["create_by"] = c.CreateBy
+	c.fieldMap["create_at"] = c.CreateAt
+	c.fieldMap["update_by"] = c.UpdateBy
+	c.fieldMap["update_at"] = c.UpdateAt
+	c.fieldMap["remove_by"] = c.RemoveBy
+	c.fieldMap["remove_at"] = c.RemoveAt
 	c.fieldMap["is_removed"] = c.IsRemoved
 }
 
