@@ -2,6 +2,16 @@
 
 cjungo 的使用示例。
 
+## swag
+
+```bash
+# 安装命令行工具
+go install github.com/swaggo/swag/cmd/swag@latest
+
+# 生成文档
+swag init
+```
+
 ## 加入 cjungo 的开发
 
 使用 git 克隆 [cjungo 项目](https://github.com/cjungo/cjungo)，和 [demo 项目](https://github.com/cjungo/demo)

@@ -18,6 +18,8 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
 	"gorm.io/gorm"
+
+	_ "github.com/cjungo/demo/docs"
 )
 
 func route(

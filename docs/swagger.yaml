@@ -1,0 +1,20 @@
+info:
+  contact: {}
+paths:
+  /:
+    get:
+      description: home
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: index
+      tags:
+      - index
+swagger: "2.0"
