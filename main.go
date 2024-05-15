@@ -25,7 +25,7 @@ import (
 func route(
 	router cjungo.HttpRouter,
 	logger *zerolog.Logger,
-	permitManager *mid.PermitManager[int32, misc.EmployeeToken],
+	permitManager *mid.PermitManager[string, misc.EmployeeToken],
 	indexController *controller.IndexController,
 	loginController *controller.LoginController,
 	taskController *controller.TaskController,
@@ -50,9 +50,9 @@ func route(
 
 	// product
 	productGroup := apiGroup.Group("/product")
-	productGroup.PUT("/add", productController.Add, permitManager.Permit(1))
-	productGroup.GET("/detail", productController.Detail, permitManager.Permit(1, 2, 4))
-	productGroup.POST("/edit", productController.Edit, permitManager.Permit(1))
+	productGroup.PUT("/add", productController.Add, permitManager.Permit("product_add"))
+	productGroup.GET("/detail", productController.Detail, permitManager.Permit("product_find"))
+	productGroup.POST("/edit", productController.Edit, permitManager.Permit("product_edit"))
 
 	return router.GetHandler()
 }
@@ -89,12 +89,12 @@ func main() {
 		}
 
 		// 注册权限管理器
-		if err := c.Provide(mid.NewPermitManager(func(ctx cjungo.HttpContext) ([]int32, misc.EmployeeToken, error) {
+		if err := c.Provide(mid.NewPermitManager(func(ctx cjungo.HttpContext) (mid.PermitProof[string, misc.EmployeeToken], error) {
 			claims := &misc.JwtClaims{}
 			if _, err := ext.ParseJwtToken(ctx, claims); err != nil {
-				return nil, claims.EmployeeToken, err
+				return claims, err
 			}
-			return claims.EmployeePermissions, claims.EmployeeToken, nil
+			return claims, nil
 		})); err != nil {
 			return err
 		}
@@ -117,6 +117,9 @@ func main() {
 			)
 			return sqlite.Transaction(func(tx *gorm.DB) error {
 				now := time.Now()
+				if err := misc.EnsurePermissions(tx); err != nil {
+					return err
+				}
 				admin := &localModel.CjEmployee{
 					ID:       1,
 					Username: "admin",
@@ -127,7 +130,12 @@ func main() {
 					UpdateBy: 0,
 					UpdateAt: now,
 				}
-				tx.Save(admin)
+				if err := tx.Save(admin).Error; err != nil {
+					return err
+				}
+				if err := misc.EnsureEmployeePermissions(tx, admin); err != nil {
+					return err
+				}
 
 				return nil
 			})

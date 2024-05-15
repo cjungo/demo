@@ -19,14 +19,14 @@ type ProductController struct {
 	sqlite       *db.Sqlite
 	mysql        *db.MySql
 	logger       *zerolog.Logger
-	tokenManager *mid.PermitManager[int32, misc.EmployeeToken]
+	tokenManager *mid.PermitManager[string, misc.EmployeeToken]
 }
 
 // 本示例因为只是为了展示可选功能，所以让 MYSQL 可选，正常项目不会让数据库可选
 type ProductControllerDi struct {
 	dig.In
 	Sqlite       *db.Sqlite
-	TokenManager *mid.PermitManager[int32, misc.EmployeeToken]
+	TokenManager *mid.PermitManager[string, misc.EmployeeToken]
 	Logger       *zerolog.Logger
 	MySql        *db.MySql `optional:"true"`
 }
@@ -98,10 +98,11 @@ func (controller *ProductController) Edit(ctx cjungo.HttpContext) error {
 		if err := controller.mysql.Transaction(func(tx *gorm.DB) error {
 			return controller.sqlite.Transaction(func(ltx *gorm.DB) error {
 				reqID := ctx.GetReqID()
-				e := &misc.EmployeeToken{}
-				if b := controller.tokenManager.GetToken(reqID, e); !b {
+				pp, b := controller.tokenManager.GetToken(reqID)
+				if !b {
 					return fmt.Errorf("无效的 TOKEN ID %s", reqID)
 				}
+				e := pp.GetToken()
 				now := time.Now()
 				m.CreateBy = e.EmployeeId
 				m.CreateAt = now

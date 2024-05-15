@@ -4,6 +4,8 @@ go 1.22.2
 
 require (
 	github.com/cjungo/cjungo v0.0.0-20240513094346-6a504747f7a3
+	github.com/deckarep/golang-set/v2 v2.6.0
+	github.com/elliotchance/pie/v2 v2.8.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/rs/zerolog v1.32.0
@@ -17,7 +19,6 @@ require (
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
-	github.com/elliotchance/pie/v2 v2.8.0 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/jsonreference v0.21.0 // indirect
 	github.com/go-openapi/spec v0.21.0 // indirect

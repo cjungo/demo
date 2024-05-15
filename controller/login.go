@@ -52,10 +52,13 @@ func (controller *LoginController) Login(ctx cjungo.HttpContext) error {
 		return ctx.RespBad("无效的账号或密码")
 	}
 
-	var permissions []int32
-	if err := controller.sqlite.Select("permission_id").
-		Table("cj_employee_permission").
-		Where("employee_id=?", employee.ID).
+	var permissions []string
+	if err := controller.sqlite.Select("P.tag").
+		Table("cj_employee_permission AS EP").
+		Joins(
+			"JOIN cj_permission AS P ON P.id=EP.permission_id",
+		).
+		Where("EP.employee_id=?", employee.ID).
 		Find(&permissions).Error; err != nil {
 		return ctx.RespBad(err)
 	}
