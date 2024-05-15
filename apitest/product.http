@@ -18,9 +18,9 @@ Content-Type: application/json
 Authorization: {{login.response.body.$.data}}
 
 {
-    "number": "20339",
-    "fullname": "名字AAAA",
-    "shortname": "AA"
+    "number": "2033993",
+    "fullname": "名字AAAA22",
+    "shortname": "AA33"
 }
 
 ###

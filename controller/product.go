@@ -6,6 +6,7 @@ import (
 
 	"github.com/cjungo/cjungo"
 	"github.com/cjungo/cjungo/db"
+	"github.com/cjungo/cjungo/ext"
 	"github.com/cjungo/cjungo/mid"
 	localModel "github.com/cjungo/demo/local/model"
 	"github.com/cjungo/demo/misc"
@@ -40,33 +41,72 @@ func NewProductController(di ProductControllerDi) (*ProductController, error) {
 	}, nil
 }
 
-func (controller *ProductController) Add(ctx cjungo.HttpContext) (err error) {
+// 使用 MoveField 可以缩小暴露接口的参数，但是麻烦。
+type ProductAddParam struct {
+	Number    string  `json:"number"` // 编号
+	Shortname *string `json:"shortname"`
+	Fullname  *string `json:"fullname"`
+}
+
+func (controller *ProductController) Add(ctx cjungo.HttpContext) error {
 	if controller.mysql != nil {
-		m := &model.CjProduct{}
-		if err = ctx.Bind(&m); err != nil {
+		param := &ProductAddParam{}
+		if err := ctx.Bind(&param); err != nil {
 			return ctx.RespBad(err)
 		}
+
+		pp, ok := controller.tokenManager.GetToken(ctx.GetReqID())
+		if !ok {
+			return fmt.Errorf("无效TOKEN ID")
+		}
+		token := pp.GetToken()
+
+		now := time.Now()
+		m := &model.CjProduct{
+			CreateBy: token.EmployeeId,
+			CreateAt: now,
+			UpdateBy: token.EmployeeId,
+			UpdateAt: now,
+		}
+		ext.MoveField(param, m)
+
+		controller.logger.Info().Any("product", m).Msg("ProductAdd")
+
+		// 这里只是示例可以使用事务的一种方式。Begin 这种形式比较底层，最后阶段比较麻烦。
+		// 建议还是使用 Transaction 的形式。参考 employee 控制器。
 		tx := controller.mysql.Begin()
-		if err = tx.Error; err != nil {
+		if err := tx.Error; err != nil {
 			return ctx.RespBad(err)
 		}
+		txc := make(chan bool, 1)
 		defer func() {
-			if err != nil {
+			select {
+			case <-txc:
+				controller.logger.Info().Msg("ProductAdd")
+			default:
+				controller.logger.Error().Msg("ProductAdd")
 				tx.Rollback()
 			}
 		}()
 
 		ltx := controller.sqlite.Begin()
-		if err = ltx.Error; err != nil {
+		if err := ltx.Error; err != nil {
 			return ctx.RespBad(err)
 		}
+		ltxc := make(chan bool, 1)
 		defer func() {
-			if err != nil {
+			select {
+			case <-ltxc:
+				controller.logger.Info().Msg("ProductAdd")
+			default:
+				controller.logger.Error().Msg("ProductAdd")
 				ltx.Rollback()
 			}
 		}()
 
-		if err = tx.Create(m).Error; err != nil {
+		controller.logger.Info().Str("tip", "事务START").Msg("ProductAdd")
+
+		if err := tx.Create(m).Error; err != nil {
 			return ctx.RespBad(err)
 		}
 		mo := &localModel.CjOperation{
@@ -74,15 +114,18 @@ func (controller *ProductController) Add(ctx cjungo.HttpContext) (err error) {
 			OperateAt:      time.Now(),
 			OperateSummary: "添加样品",
 		}
-		if err = ltx.Create(mo).Error; err != nil {
+		if err := ltx.Create(mo).Error; err != nil {
 			return ctx.RespBad(err)
 		}
-		if err = tx.Commit().Error; err != nil {
+		controller.logger.Info().Str("tip", "事务END").Msg("ProductAdd")
+		if err := tx.Commit().Error; err != nil {
 			return ctx.RespBad(err)
 		}
-		if err = ltx.Commit().Error; err != nil {
+		if err := ltx.Commit().Error; err != nil {
 			return ctx.RespBad(err)
 		}
+		txc <- true
+		ltxc <- true
 		return ctx.Resp(m)
 	} else {
 		return ctx.Resp("没有数据库")

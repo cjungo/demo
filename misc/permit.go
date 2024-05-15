@@ -11,7 +11,11 @@ var Permissions []localModel.CjPermission
 
 func init() {
 	Permissions = []localModel.CjPermission{
-		{ID: 12000, ParentID: 0, Tag: "product", Name: "样品"},
+		{ID: 11000, ParentID: 0, Tag: "employee", Name: "员工管理"},
+		{ID: 11001, ParentID: 11000, Tag: "employee_find", Name: "员工查看"},
+		{ID: 11002, ParentID: 11000, Tag: "employee_add", Name: "员工添加"},
+		{ID: 11003, ParentID: 11000, Tag: "employee_edit", Name: "员工修改"},
+		{ID: 12000, ParentID: 0, Tag: "product", Name: "样品管理"},
 		{ID: 12001, ParentID: 12000, Tag: "product_find", Name: "样品查看"},
 		{ID: 12002, ParentID: 12000, Tag: "product_add", Name: "样品添加"},
 		{ID: 12003, ParentID: 12000, Tag: "product_edit", Name: "样品修改"},
@@ -23,7 +27,13 @@ func EnsurePermissions(tx *gorm.DB) error {
 	if err := tx.Find(&permissions).Error; err != nil {
 		return err
 	}
-	added, _ := pie.Diff(permissions, Permissions)
+	added, removed := pie.Diff(permissions, Permissions)
+	if len(removed) > 0 {
+		if err := tx.Delete(removed).Error; err != nil {
+			return err
+		}
+	}
+
 	if len(added) > 0 {
 		if err := tx.CreateInBatches(added, 100).Error; err != nil {
 			return err
@@ -41,13 +51,15 @@ func EnsureEmployeePermissions(tx *gorm.DB, employee *localModel.CjEmployee) err
 	needs := pie.Filter(Permissions, func(p localModel.CjPermission) bool {
 		return !epidset.ContainsOne(p.ID)
 	})
-	added := make([]localModel.CjEmployeePermission, len(needs))
-	for i, p := range needs {
-		added[i].EmployeeID = employee.ID
-		added[i].PermissionID = p.ID
-	}
-	if err := tx.Save(added).Error; err != nil {
-		return err
+	if len(needs) > 0 {
+		added := make([]localModel.CjEmployeePermission, len(needs))
+		for i, p := range needs {
+			added[i].EmployeeID = employee.ID
+			added[i].PermissionID = p.ID
+		}
+		if err := tx.Save(added).Error; err != nil {
+			return err
+		}
 	}
 	return nil
 }

@@ -23,6 +23,8 @@ func NewEmployeeController(
 	}
 }
 
+// 此种方式，会使得参数多出 ID 这种不应该出现的字段。
+// 虽然可以不传，却脏。
 type EmployeeAddParam struct {
 	model.CjEmployee
 	Permissions []int32 `json:"permissions" form:"permissions"`
@@ -67,6 +69,7 @@ func (controller *EmployeeController) Edit(ctx cjungo.HttpContext) error {
 		return ctx.RespBad(err)
 	}
 
+	// 推荐的事务使用， Transaction 要比 Begin 方便。
 	if err := controller.sqlite.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Save(&param.CjEmployee).Error; err != nil {
 			return err
