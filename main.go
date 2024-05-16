@@ -26,6 +26,7 @@ func route(
 	router cjungo.HttpRouter,
 	logger *zerolog.Logger,
 	permitManager *mid.PermitManager[string, misc.EmployeeToken],
+	captchaController *ext.CaptchaController,
 	indexController *controller.IndexController,
 	loginController *controller.LoginController,
 	taskController *controller.TaskController,
@@ -34,6 +35,7 @@ func route(
 ) http.Handler {
 	router.GET("/", indexController.Index)
 	router.POST("/login", loginController.Login)
+	router.GET("/captcha/math", captchaController.GenerateMath)
 
 	apiGroup := router.Group("/api")
 
@@ -164,6 +166,7 @@ func main() {
 			controller.NewTaskController,
 			controller.NewEmployeeController,
 			controller.NewProductController,
+			ext.NewCaptchaController,
 		}); err != nil {
 			return err
 		}

@@ -1,5 +1,9 @@
 @host = http://127.0.0.1:12345
 
+###
+# @name captcha
+GET {{host}}/captcha/math HTTP/1.1
+
 
 ###
 # @name login
@@ -8,5 +12,7 @@ Content-Type: application/json
 
 {
     "username": "admin",
-    "password": "admin"
+    "password": "admin",
+    "captchaId":  "{{captcha.response.body.$.data.id}}",
+    "captchaAnswer": "43"
 }

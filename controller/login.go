@@ -14,29 +14,38 @@ import (
 )
 
 type LoginController struct {
-	logger *zerolog.Logger
-	sqlite *db.Sqlite
+	logger            *zerolog.Logger
+	sqlite            *db.Sqlite
+	captchaController *ext.CaptchaController
 }
 
 func NewLoginController(
 	logger *zerolog.Logger,
 	sqlite *db.Sqlite,
+	captchaController *ext.CaptchaController,
 ) (*LoginController, error) {
 	return &LoginController{
-		logger: logger,
-		sqlite: sqlite,
+		logger:            logger,
+		sqlite:            sqlite,
+		captchaController: captchaController,
 	}, nil
 }
 
 type LoginParam struct {
-	Username string `json:"username" form:"username" query:"username"`
-	Password string `json:"password" form:"password" query:"password"`
+	Username      string `json:"username" form:"username" query:"username"`
+	Password      string `json:"password" form:"password" query:"password"`
+	CaptchaID     string `json:"captchaId" form:"captchaId" query:"captchaId"`
+	CaptchaAnswer string `json:"captchaAnswer" form:"captchaAnswer" query:"captchaAnswer"`
 }
 
 func (controller *LoginController) Login(ctx cjungo.HttpContext) error {
 	param := &LoginParam{}
 
 	if err := ctx.Bind(param); err != nil {
+		return ctx.RespBad(err)
+	}
+
+	if err := controller.captchaController.Verify(param.CaptchaID, param.CaptchaAnswer, true); err != nil {
 		return ctx.RespBad(err)
 	}
 
