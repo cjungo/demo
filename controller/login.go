@@ -50,8 +50,9 @@ func (controller *LoginController) Login(ctx cjungo.HttpContext) error {
 	}
 
 	employee := &model.CjEmployee{}
+	password := ext.Sha256(param.Password).Hex()
 	if err := controller.sqlite.Select("*").
-		Where("username=? AND password=?", param.Username, param.Password).
+		Where("username=? AND password=?", param.Username, password).
 		Find(employee).Error; err != nil {
 		return ctx.RespBad(err)
 	}

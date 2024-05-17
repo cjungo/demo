@@ -14,5 +14,5 @@ Content-Type: application/json
     "username": "admin",
     "password": "admin",
     "captchaId":  "{{captcha.response.body.$.data.id}}",
-    "captchaAnswer": "43"
+    "captchaAnswer": "33"
 }
