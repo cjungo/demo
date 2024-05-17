@@ -1,6 +1,9 @@
 package misc
 
 import (
+	"time"
+
+	"github.com/cjungo/cjungo/ext"
 	localModel "github.com/cjungo/demo/local/model"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/elliotchance/pie/v2"
@@ -40,6 +43,30 @@ func EnsurePermissions(tx *gorm.DB) error {
 		}
 	}
 	return nil
+}
+
+func EnsureAdmin(tx *gorm.DB) error {
+	admin := &localModel.CjEmployee{}
+	if err := tx.Find(admin, 1).Error; err != nil {
+		return err
+	}
+	if admin.ID != 1 {
+		now := time.Now()
+		admin = &localModel.CjEmployee{
+			ID:       1,
+			Username: "admin",
+			Password: ext.Sha256("admin").Hex(),
+			Nickname: "admin",
+			CreateBy: 0,
+			CreateAt: now,
+			UpdateBy: 0,
+			UpdateAt: now,
+		}
+		if err := tx.Save(admin).Error; err != nil {
+			return err
+		}
+	}
+	return EnsureEmployeePermissions(tx, admin)
 }
 
 func EnsureEmployeePermissions(tx *gorm.DB, employee *localModel.CjEmployee) error {

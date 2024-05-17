@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/cjungo/cjungo"
 	"github.com/cjungo/cjungo/db"
@@ -118,24 +117,11 @@ func main() {
 				&localModel.CjEmployeePermission{},
 			)
 			return sqlite.Transaction(func(tx *gorm.DB) error {
-				now := time.Now()
 				if err := misc.EnsurePermissions(tx); err != nil {
 					return err
 				}
-				admin := &localModel.CjEmployee{
-					ID:       1,
-					Username: "admin",
-					Password: "admin",
-					Nickname: "admin",
-					CreateBy: 0,
-					CreateAt: now,
-					UpdateBy: 0,
-					UpdateAt: now,
-				}
-				if err := tx.Save(admin).Error; err != nil {
-					return err
-				}
-				if err := misc.EnsureEmployeePermissions(tx, admin); err != nil {
+
+				if err := misc.EnsureAdmin(tx); err != nil {
 					return err
 				}
 
