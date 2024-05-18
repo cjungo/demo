@@ -132,9 +132,13 @@ func main() {
 			return err
 		}
 
-		// 注册 ETCD
+		// 注册 ETCD 发现服务
 		if err := c.Provide(ext.NewEtcdDiscovery); err != nil {
 			return err
+		}
+		// 注册 ETCD 注册服务
+		if err := c.Provide(ext.NewEtcdRegister); err != nil {
+			return nil
 		}
 
 		// 注册队列
@@ -174,20 +178,49 @@ func main() {
 		log.Fatalln(err)
 	}
 	app.BeforeRun = func(container cjungo.DiContainer) error {
+		// ETCD 注册服务
+		if err := container.Invoke(func(register *ext.EtcdRegister) error {
+			pairs := []ext.EtcdPair{
+				{Key: "/web/kkkkk1", Value: "一些信息2"},
+				{Key: "/web/kkkkk2", Value: "一些信息3"},
+				{Key: "/web/kkkkk3", Value: "一些信息4"},
+				{Key: "/web/kkkkk4", Value: "一些信息5"},
+			}
+
+			for _, pair := range pairs {
+				if leasePair, err := register.RegisterPair(pair, 40); err != nil {
+					return err
+				} else {
+					// 如果需要挂载写入状态，可以读 keepAlive 通道。
+					go func(pair *ext.EtcdPair) {
+						for resp := range leasePair.KeepAliveChan {
+							register.Logger.Info().
+								Any("keep", resp).
+								Any("pair", pair).
+								Msg("[ETCD]")
+						}
+						register.Logger.Info().
+							Any("keep", "关闭").
+							Any("pair", pair).
+							Msg("[ETCD]")
+					}(&pair)
+				}
+			}
+			return nil
+		}); err != nil {
+			return err
+		}
+
 		// ETCD 发现服务
 		return container.Invoke(func(discovery *ext.EtcdDiscovery) error {
 			discovery.Logger.Info().Msg("发现服务...")
 			if err := discovery.WatchService("/web"); err != nil {
 				return err
 			}
-			go func() {
-				for {
-					select {
-					case <-time.Tick(10 * time.Second):
-						discovery.Logger.Info().Any("list", discovery.ListService()).Msg("[ETCD]")
-					}
-				}
-			}()
+			go ext.Tick(10*time.Second, func() error {
+				discovery.Logger.Info().Any("list", discovery.ListService()).Msg("[ETCD]")
+				return nil
+			})
 			return nil
 		})
 	}
