@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/cjungo/cjungo"
 	"github.com/cjungo/cjungo/db"
@@ -131,6 +132,11 @@ func main() {
 			return err
 		}
 
+		// 注册 ETCD
+		if err := c.Provide(ext.NewEtcdDiscovery); err != nil {
+			return err
+		}
+
 		// 注册队列
 		if err := c.Provide(cjungo.NewTaskQueueHandle(func(queue *cjungo.TaskQueue) error {
 			queue.RegisterProcess("action-1", func(param *cjungo.TaskAction) (cjungo.TaskResultMessage, error) {
@@ -166,6 +172,24 @@ func main() {
 	})
 	if err != nil {
 		log.Fatalln(err)
+	}
+	app.BeforeRun = func(container cjungo.DiContainer) error {
+		// ETCD 发现服务
+		return container.Invoke(func(discovery *ext.EtcdDiscovery) error {
+			discovery.Logger.Info().Msg("发现服务...")
+			if err := discovery.WatchService("/web"); err != nil {
+				return err
+			}
+			go func() {
+				for {
+					select {
+					case <-time.Tick(10 * time.Second):
+						discovery.Logger.Info().Any("list", discovery.ListService()).Msg("[ETCD]")
+					}
+				}
+			}()
+			return nil
+		})
 	}
 	if err := app.Run(); err != nil {
 		log.Fatalln(err)
