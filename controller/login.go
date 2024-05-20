@@ -32,10 +32,10 @@ func NewLoginController(
 }
 
 type LoginParam struct {
-	Username      string `json:"username" form:"username" query:"username"`
-	Password      string `json:"password" form:"password" query:"password"`
-	CaptchaID     string `json:"captchaId" form:"captchaId" query:"captchaId"`
-	CaptchaAnswer string `json:"captchaAnswer" form:"captchaAnswer" query:"captchaAnswer"`
+	Username      string `json:"username" form:"username" query:"username" validate:"optional" example:"admin"`
+	Password      string `json:"password" form:"password" query:"password" validate:"optional" example:"admin"`
+	CaptchaID     string `json:"captchaId" form:"captchaId" query:"captchaId" validate:"optional" example:"1"`
+	CaptchaAnswer string `json:"captchaAnswer" form:"captchaAnswer" query:"captchaAnswer" validate:"optional" example:"12"`
 }
 
 func (controller *LoginController) Login(ctx cjungo.HttpContext) error {
