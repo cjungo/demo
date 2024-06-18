@@ -2,62 +2,21 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/cjungo/cjungo"
 	"github.com/cjungo/cjungo/db"
 	"github.com/cjungo/cjungo/ext"
 	"github.com/cjungo/cjungo/mid"
-	"github.com/cjungo/demo/controller"
 	"github.com/cjungo/demo/entity"
 	localEntity "github.com/cjungo/demo/local/entity"
 	localModel "github.com/cjungo/demo/local/model"
 	"github.com/cjungo/demo/misc"
 	"github.com/cjungo/demo/model"
-	"github.com/labstack/echo/v4/middleware"
-	"github.com/rs/zerolog"
 	"gorm.io/gorm"
 
 	_ "github.com/cjungo/demo/docs"
 )
-
-func route(
-	router cjungo.HttpRouter,
-	logger *zerolog.Logger,
-	permitManager *mid.PermitManager[string, misc.EmployeeToken],
-	captchaController *ext.CaptchaController,
-	indexController *controller.IndexController,
-	loginController *controller.LoginController,
-	taskController *controller.TaskController,
-	employeeController *controller.EmployeeController,
-	productController *controller.ProductController,
-) http.Handler {
-	router.GET("/", indexController.Index)
-	router.POST("/login", loginController.Login)
-	router.GET("/captcha/math", captchaController.GenerateMath)
-
-	apiGroup := router.Group("/api")
-
-	// task
-	taskGroup := apiGroup.Group("/task", middleware.CORS())
-	taskGroup.POST("/push", taskController.Push)
-	taskGroup.GET("/query", taskController.Query)
-
-	// employee
-	employeeGroup := apiGroup.Group("/employee", middleware.Gzip())
-	employeeGroup.PUT("/add", employeeController.Add)
-	employeeGroup.GET("/detail", employeeController.Detail)
-	employeeGroup.POST("/edit", employeeController.Edit)
-
-	// product
-	productGroup := apiGroup.Group("/product")
-	productGroup.PUT("/add", productController.Add, permitManager.Permit("product_add"))
-	productGroup.GET("/detail", productController.Detail, permitManager.Permit("product_find"))
-	productGroup.POST("/edit", productController.Edit, permitManager.Permit("product_edit"))
-
-	return router.GetHandler()
-}
 
 func init() {
 	if err := cjungo.LoadEnv(); err != nil {
@@ -156,14 +115,7 @@ func main() {
 		}
 
 		// 注册控制器
-		if err := c.ProvideController([]any{
-			controller.NewIndexController,
-			controller.NewLoginController,
-			controller.NewTaskController,
-			controller.NewEmployeeController,
-			controller.NewProductController,
-			ext.NewCaptchaController,
-		}); err != nil {
+		if err := c.ProvideController(provideControllers); err != nil {
 			return err
 		}
 
@@ -187,25 +139,27 @@ func main() {
 				{Key: "/web/kkkkk4", Value: "一些信息5"},
 			}
 
-			for _, pair := range pairs {
-				if leasePair, err := register.RegisterPair(pair, 40); err != nil {
-					return err
-				} else {
-					// 如果需要挂载写入状态，可以读 keepAlive 通道。
-					go func(pair *ext.EtcdPair) {
-						for resp := range leasePair.KeepAliveChan {
+			go func() {
+				for _, pair := range pairs {
+					if leasePair, err := register.RegisterPair(pair, 40); err != nil {
+						register.Logger.Err(err).Msg("[ETCD]")
+					} else {
+						// 如果需要挂载写入状态，可以读 keepAlive 通道。
+						go func(pair *ext.EtcdPair) {
+							for resp := range leasePair.KeepAliveChan {
+								register.Logger.Info().
+									Any("keep", resp).
+									Any("pair", pair).
+									Msg("[ETCD]")
+							}
 							register.Logger.Info().
-								Any("keep", resp).
+								Any("keep", "关闭").
 								Any("pair", pair).
 								Msg("[ETCD]")
-						}
-						register.Logger.Info().
-							Any("keep", "关闭").
-							Any("pair", pair).
-							Msg("[ETCD]")
-					}(&pair)
+						}(&pair)
+					}
 				}
-			}
+			}()
 			return nil
 		}); err != nil {
 			return err
@@ -213,10 +167,12 @@ func main() {
 
 		// ETCD 发现服务
 		return container.Invoke(func(discovery *ext.EtcdDiscovery) error {
-			discovery.Logger.Info().Msg("发现服务...")
-			if err := discovery.WatchService("/web"); err != nil {
-				return err
-			}
+			discovery.Logger.Info().Str("action", "发现服务...").Msg("[ETCD]")
+			go func() {
+				if err := discovery.WatchService("/web"); err != nil {
+					discovery.Logger.Err(err).Msg("[ETCD]")
+				}
+			}()
 			go ext.Tick(10*time.Second, func() error {
 				discovery.Logger.Info().Any("list", discovery.ListService()).Msg("[ETCD]")
 				return nil

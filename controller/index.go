@@ -22,3 +22,11 @@ func NewIndexController() *IndexController {
 func (controller *IndexController) Index(ctx cjungo.HttpContext) error {
 	return ctx.RespOk()
 }
+
+func (controller *IndexController) Status(ctx cjungo.HttpContext) error {
+	return ctx.Resp(map[string]any{
+		"reqID":  ctx.GetReqID(),
+		"reqAt":  ctx.GetReqAt(),
+		"realIP": ctx.RealIP(),
+	})
+}

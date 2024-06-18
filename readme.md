@@ -21,6 +21,9 @@ swag init
 go work init
 go work use ./cjungo
 go work use ./demo
+
+# 运行
+go run ./demo
 ```
 
 ```
