@@ -55,7 +55,7 @@ func (controller *ProductController) Add(ctx cjungo.HttpContext) error {
 			return ctx.RespBad(err)
 		}
 
-		pp, ok := controller.tokenManager.GetToken(ctx.GetReqID())
+		pp, ok := controller.tokenManager.GetProof(ctx)
 		if !ok {
 			return fmt.Errorf("无效TOKEN ID")
 		}
@@ -140,10 +140,9 @@ func (controller *ProductController) Edit(ctx cjungo.HttpContext) error {
 		}
 		if err := controller.mysql.Transaction(func(tx *gorm.DB) error {
 			return controller.sqlite.Transaction(func(ltx *gorm.DB) error {
-				reqID := ctx.GetReqID()
-				pp, b := controller.tokenManager.GetToken(reqID)
+				pp, b := controller.tokenManager.GetProof(ctx)
 				if !b {
-					return fmt.Errorf("无效的 TOKEN ID %s", reqID)
+					return fmt.Errorf("无效的 TOKEN ID %s", ctx.GetReqID())
 				}
 				e := pp.GetToken()
 				now := time.Now()
