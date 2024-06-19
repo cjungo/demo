@@ -56,7 +56,7 @@ func (controller *LoginController) Login(ctx cjungo.HttpContext) error {
 		Find(employee).Error; err != nil {
 		return ctx.RespBad(err)
 	}
-	controller.logger.Info().Any("employee", employee).Msg("登录")
+	controller.logger.Info().Any("employee", employee).Str("action", "登录").Msg("[LOGIN]")
 
 	if employee.ID == 0 {
 		return ctx.RespBad("无效的账号或密码")
@@ -73,7 +73,7 @@ func (controller *LoginController) Login(ctx cjungo.HttpContext) error {
 		return ctx.RespBad(err)
 	}
 
-	controller.logger.Info().Any("permissions", permissions).Msg("权限")
+	controller.logger.Info().Any("permissions", permissions).Str("action", "权限").Msg("[LOGIN]")
 
 	claims := &misc.JwtClaims{
 		EmployeeToken: misc.EmployeeToken{

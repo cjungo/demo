@@ -70,7 +70,7 @@ func (controller *ProductController) Add(ctx cjungo.HttpContext) error {
 		}
 		ext.MoveField(param, m)
 
-		controller.logger.Info().Any("product", m).Msg("ProductAdd")
+		controller.logger.Info().Any("product", m).Str("action", "添加").Msg("[PRODUCT]")
 
 		// 这里只是示例可以使用事务的一种方式。Begin 这种形式比较底层，最后阶段比较麻烦。
 		// 建议还是使用 Transaction 的形式。参考 employee 控制器。
@@ -82,9 +82,9 @@ func (controller *ProductController) Add(ctx cjungo.HttpContext) error {
 		defer func() {
 			select {
 			case <-txc:
-				controller.logger.Info().Msg("ProductAdd")
+				controller.logger.Info().Str("action", "添加").Msg("[PRODUCT]")
 			default:
-				controller.logger.Error().Msg("ProductAdd")
+				controller.logger.Error().Str("action", "添加").Msg("[PRODUCT]")
 				tx.Rollback()
 			}
 		}()
@@ -97,15 +97,14 @@ func (controller *ProductController) Add(ctx cjungo.HttpContext) error {
 		defer func() {
 			select {
 			case <-ltxc:
-				controller.logger.Info().Msg("ProductAdd")
+				controller.logger.Info().Str("action", "添加").Msg("[PRODUCT]")
 			default:
-				controller.logger.Error().Msg("ProductAdd")
+				controller.logger.Error().Str("action", "添加").Msg("[PRODUCT]")
 				ltx.Rollback()
 			}
 		}()
 
-		controller.logger.Info().Str("tip", "事务START").Msg("ProductAdd")
-
+		controller.logger.Info().Str("tip", "事务START").Str("action", "添加").Msg("[PRODUCT]")
 		if err := tx.Create(m).Error; err != nil {
 			return ctx.RespBad(err)
 		}
@@ -117,7 +116,7 @@ func (controller *ProductController) Add(ctx cjungo.HttpContext) error {
 		if err := ltx.Create(mo).Error; err != nil {
 			return ctx.RespBad(err)
 		}
-		controller.logger.Info().Str("tip", "事务END").Msg("ProductAdd")
+		controller.logger.Info().Str("tip", "事务END").Str("action", "添加").Msg("[PRODUCT]")
 		if err := tx.Commit().Error; err != nil {
 			return ctx.RespBad(err)
 		}

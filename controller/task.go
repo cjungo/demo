@@ -41,12 +41,12 @@ func (controller *TaskController) Push(ctx cjungo.HttpContext) error {
 func (controller *TaskController) Query(ctx cjungo.HttpContext) error {
 	id := ctx.QueryParam("id")
 	controller.logger.Info().
-		Str("ID", id).
-		Msg("任务")
+		Str("action", "任务").
+		Str("id", id).
+		Msg("[TASK]")
 	if result, err := controller.queue.QueryTask(id); err != nil {
 		return ctx.RespBad(err)
 	} else {
 		return ctx.Resp(result)
 	}
 }
-
