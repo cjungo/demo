@@ -58,6 +58,9 @@ func main() {
 		})); err != nil {
 			return err
 		}
+		if err := c.Provide(misc.NewJwtClaimsManger); err != nil {
+			return err
+		}
 
 		// 注册数据库
 		if err := c.Provide(db.NewMySqlHandle(func(mysql *db.MySql) error {

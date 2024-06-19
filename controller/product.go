@@ -1,13 +1,11 @@
 package controller
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/cjungo/cjungo"
 	"github.com/cjungo/cjungo/db"
 	"github.com/cjungo/cjungo/ext"
-	"github.com/cjungo/cjungo/mid"
 	localModel "github.com/cjungo/demo/local/model"
 	"github.com/cjungo/demo/misc"
 	"github.com/cjungo/demo/model"
@@ -20,14 +18,14 @@ type ProductController struct {
 	sqlite       *db.Sqlite
 	mysql        *db.MySql
 	logger       *zerolog.Logger
-	tokenManager *mid.PermitManager[string, misc.EmployeeToken]
+	tokenManager *misc.JwtClaimsManager
 }
 
 // 本示例因为只是为了展示可选功能，所以让 MYSQL 可选，正常项目不会让数据库可选
 type ProductControllerDi struct {
 	dig.In
 	Sqlite       *db.Sqlite
-	TokenManager *mid.PermitManager[string, misc.EmployeeToken]
+	TokenManager *misc.JwtClaimsManager
 	Logger       *zerolog.Logger
 	MySql        *db.MySql `optional:"true"`
 }
@@ -55,11 +53,7 @@ func (controller *ProductController) Add(ctx cjungo.HttpContext) error {
 			return ctx.RespBad(err)
 		}
 
-		pp, ok := controller.tokenManager.GetProof(ctx)
-		if !ok {
-			return fmt.Errorf("无效TOKEN ID")
-		}
-		token := pp.GetStore()
+		token := controller.tokenManager.GetToken(ctx)
 
 		now := time.Now()
 		m := &model.CjProduct{
@@ -139,11 +133,7 @@ func (controller *ProductController) Edit(ctx cjungo.HttpContext) error {
 		}
 		if err := controller.mysql.Transaction(func(tx *gorm.DB) error {
 			return controller.sqlite.Transaction(func(ltx *gorm.DB) error {
-				pp, b := controller.tokenManager.GetProof(ctx)
-				if !b {
-					return fmt.Errorf("无效的 TOKEN ID %s", ctx.GetReqID())
-				}
-				e := pp.GetStore()
+				e := controller.tokenManager.GetToken(ctx)
 				now := time.Now()
 				m.CreateBy = e.EmployeeId
 				m.CreateAt = now
