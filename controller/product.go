@@ -59,7 +59,7 @@ func (controller *ProductController) Add(ctx cjungo.HttpContext) error {
 		if !ok {
 			return fmt.Errorf("无效TOKEN ID")
 		}
-		token := pp.GetToken()
+		token := pp.GetStore()
 
 		now := time.Now()
 		m := &model.CjProduct{
@@ -144,7 +144,7 @@ func (controller *ProductController) Edit(ctx cjungo.HttpContext) error {
 				if !b {
 					return fmt.Errorf("无效的 TOKEN ID %s", ctx.GetReqID())
 				}
-				e := pp.GetToken()
+				e := pp.GetStore()
 				now := time.Now()
 				m.CreateBy = e.EmployeeId
 				m.CreateAt = now

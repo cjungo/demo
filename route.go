@@ -1,5 +1,7 @@
 package main
 
+// 路由示例
+
 import (
 	"net/http"
 
@@ -12,6 +14,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
+// 注册控制器类列表
 var provideControllers = []any{
 	controller.NewIndexController,
 	controller.NewLoginController,
@@ -21,6 +24,7 @@ var provideControllers = []any{
 	ext.NewCaptchaController,
 }
 
+// 路由注册
 func route(
 	router cjungo.HttpRouter,
 	logger *zerolog.Logger,

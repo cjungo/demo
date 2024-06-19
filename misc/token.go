@@ -19,6 +19,6 @@ func (claims *JwtClaims) GetPermissions() []string {
 	return claims.EmployeePermissions
 }
 
-func (claims *JwtClaims) GetToken() EmployeeToken {
+func (claims *JwtClaims) GetStore() EmployeeToken {
 	return claims.EmployeeToken
 }
