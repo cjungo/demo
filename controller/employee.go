@@ -116,3 +116,11 @@ func (controller *EmployeeController) Detail(ctx cjungo.HttpContext) error {
 
 	return ctx.Resp(result)
 }
+
+func (controller *EmployeeController) Delete(ctx cjungo.HttpContext) error {
+	id := ctx.QueryParam("id")
+	if err := controller.sqlite.Delete(&model.CjEmployee{}, id).Error; err != nil {
+		return ctx.RespBad(err)
+	}
+	return ctx.RespOk()
+}

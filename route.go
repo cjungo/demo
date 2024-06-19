@@ -53,6 +53,7 @@ func route(
 	employeeGroup.PUT("/add", employeeController.Add)
 	employeeGroup.GET("/detail", employeeController.Detail)
 	employeeGroup.POST("/edit", employeeController.Edit)
+	employeeGroup.DELETE("/delete", employeeController.Delete)
 
 	// product
 	productGroup := apiGroup.Group("/product")
