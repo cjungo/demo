@@ -22,6 +22,7 @@ var provideControllers = []any{
 	controller.NewEmployeeController,
 	controller.NewProductController,
 	ext.NewCaptchaController,
+	controller.NewInstantController,
 }
 
 // 路由注册
@@ -35,6 +36,7 @@ func route(
 	taskController *controller.TaskController,
 	employeeController *controller.EmployeeController,
 	productController *controller.ProductController,
+	instantController *controller.InstantController,
 ) http.Handler {
 	router.GET("/", indexController.Index)
 	router.GET("/status", indexController.Status)
@@ -42,6 +44,9 @@ func route(
 	router.GET("/captcha/math", captchaController.GenerateMath)
 
 	apiGroup := router.Group("/api")
+
+	// instant
+	apiGroup.GET("/instant", instantController.Index)
 
 	// task
 	taskGroup := apiGroup.Group("/task", middleware.CORS())
