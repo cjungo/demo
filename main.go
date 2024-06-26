@@ -117,7 +117,7 @@ func main() {
 		}
 
 		// 注册控制器
-		if err := c.ProvideController(provideControllers); err != nil {
+		if err := c.Provides(provideControllers...); err != nil {
 			return err
 		}
 
