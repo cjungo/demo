@@ -2,6 +2,19 @@
 
 cjungo 的使用示例。
 
+## cmds
+
+```bash
+# unnamed 命令示例
+go run ./demo/cmds/unnamed -n 必须
+
+# 帮助信息
+go run ./demo/cmds/unnamed -h
+
+# fake_employee 命令示例
+go run ./demo/cmds/fake_employee
+```
+
 ## swag
 
 ```bash

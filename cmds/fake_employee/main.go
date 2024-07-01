@@ -19,7 +19,7 @@ func FakeEmployee(logger *zerolog.Logger, mysql *db.MySql) error {
 
 func main() {
 	// 使用命名函数时，日志文件和任务名是函数名。
-	if err := cjungo.RunCommand(
+	if err := cjungo.RunCommand[any]( // any 不要参数
 		FakeEmployee,
 		db.LoadMySqlConfFormEnv,
 		db.LoadSqliteConfFormEnv,
