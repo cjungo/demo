@@ -25,30 +25,17 @@ func init() {
 
 func main() {
 	app, err := cjungo.NewApplication(func(c cjungo.DiContainer) error {
-		// 加载日志配置
-		if err := c.Provide(cjungo.LoadLoggerConfFromEnv); err != nil {
+		if err := c.Provides(
+			cjungo.LoadLoggerConfFromEnv,     // 加载日志配置
+			db.LoadMySqlConfFormEnv,          // 加载 Mysql 配置
+			db.LoadSqliteConfFormEnv,         // 加载 Sqlite 配置
+			cjungo.LoadHttpServerConfFromEnv, // 加载服务器配置
+			cjungo.LoadTaskConfFromEnv,       // 加载队列配置
+		); err != nil {
 			return err
 		}
 
-		// 加载数据库配置
-		if err := c.Provide(db.LoadMySqlConfFormEnv); err != nil {
-			return err
-		}
-		if err := c.Provide(db.LoadSqliteConfFormEnv); err != nil {
-			return err
-		}
-
-		// 加载服务器配置
-		if err := c.Provide(cjungo.LoadHttpServerConfFromEnv); err != nil {
-			return err
-		}
-
-		// 加载队列配置
-		if err := c.Provide(cjungo.LoadTaskConfFromEnv); err != nil {
-			return err
-		}
-
-		// 注册权限管理器
+		// 注册权限管理器，依赖 misc.NewJwtClaimsManger
 		if err := c.Provide(mid.NewPermitManager(func(ctx cjungo.HttpContext) (mid.PermitProof[string, misc.EmployeeToken], error) {
 			claims := &misc.JwtClaims{}
 			if _, err := ext.ParseJwtToken(ctx, claims); err != nil {
@@ -67,7 +54,7 @@ func main() {
 			return err
 		}
 
-		// 注册数据库
+		// 注册数据库，依赖 db.LoadMySqlConfFormEnv
 		if err := c.Provide(db.NewMySqlHandle(func(mysql *db.MySql) error {
 			entity.Use(mysql.DB)
 			mysql.AutoMigrate(&model.CjProduct{})
@@ -75,6 +62,7 @@ func main() {
 		})); err != nil {
 			return err
 		}
+		// 依赖 db.LoadSqliteConfFormEnv
 		if err := c.Provide(db.NewSqliteHandle(func(sqlite *db.Sqlite) error {
 			localEntity.Use(sqlite.DB)
 			sqlite.AutoMigrate(
@@ -107,7 +95,7 @@ func main() {
 			return nil
 		}
 
-		// 注册队列
+		// 注册队列，依赖 cjungo.LoadTaskConfFromEnv
 		if err := c.Provide(cjungo.NewTaskQueueHandle(func(queue *cjungo.TaskQueue) error {
 			queue.RegisterProcess("action-1", func(param *cjungo.TaskAction) (cjungo.TaskResultMessage, error) {
 				queue.Logger.Info().
