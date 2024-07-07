@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cjungo/cjungo"
@@ -59,7 +60,7 @@ func (controller *LoginController) Login(ctx cjungo.HttpContext) error {
 	controller.logger.Info().Any("employee", employee).Str("action", "登录").Msg("[LOGIN]")
 
 	if employee.ID == 0 {
-		return ctx.RespBad("无效的账号或密码")
+		return ctx.RespBad(fmt.Errorf("无效的账号或密码"))
 	}
 
 	var permissions []string
