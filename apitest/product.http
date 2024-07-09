@@ -1,5 +1,8 @@
 @host = http://127.0.0.1:12345
 
+###
+# @name captcha
+GET {{host}}/captcha/math HTTP/1.1
 
 ###
 # @name login
@@ -8,7 +11,9 @@ Content-Type: application/json
 
 {
     "username": "admin",
-    "password": "admin"
+    "password": "admin",
+    "captchaId":  "{{captcha.response.body.$.data.id}}",
+    "captchaAnswer": "-1"
 }
 
 ###
@@ -18,14 +23,14 @@ Content-Type: application/json
 Authorization: {{login.response.body.$.data}}
 
 {
-    "number": "2033993",
+    "number": "2033993331372",
     "fullname": "名字AAAA22",
     "shortname": "AA33"
 }
 
 ###
 # @name productDetial
-GET {{host}}/api/product/detail?id=4 HTTP/1.1
+GET {{host}}/api/product/detail?id=12 HTTP/1.1
 Authorization: {{login.response.body.$.data}}
 
 ###

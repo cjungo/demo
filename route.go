@@ -62,9 +62,9 @@ func route(
 
 	// product
 	productGroup := apiGroup.Group("/product")
-	productGroup.PUT("/add", productController.Add, permitManager.Permit("product_add"))
+	productGroup.PUT("/add", productController.Add, permitManager.Permit("product_add"), permitManager.Permit("product_find")) // AND
 	productGroup.GET("/detail", productController.Detail, permitManager.Permit("product_find"))
-	productGroup.POST("/edit", productController.Edit, permitManager.Permit("product_edit"))
+	productGroup.POST("/edit", productController.Edit, permitManager.Permit("product_add", "product_edit")) // OR
 
 	return router.GetHandler()
 }
