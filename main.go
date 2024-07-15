@@ -31,6 +31,7 @@ func main() {
 			db.LoadSqliteConfFormEnv,         // 加载 Sqlite 配置
 			cjungo.LoadHttpServerConfFromEnv, // 加载服务器配置
 			cjungo.LoadTaskConfFromEnv,       // 加载队列配置
+			ext.NewStorageManager,            // 加载存储管理
 		); err != nil {
 			return err
 		}

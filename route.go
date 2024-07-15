@@ -31,6 +31,7 @@ var provideControllers = []any{
 func route(
 	router cjungo.HttpRouter,
 	logger *zerolog.Logger,
+	storageManager *ext.StorageManager,
 	permitManager *mid.PermitManager[string, misc.EmployeeToken],
 	captchaController *ext.CaptchaController,
 	indexController *controller.IndexController,
@@ -51,7 +52,7 @@ func route(
 	router.GET("/captcha/math", captchaController.GenerateMath)
 
 	uploadDir := filepath.Join(here, "upload")
-	ext.StorageFor(router, logger, &ext.StorageConf{
+	storageManager.Route(router, &ext.StorageConf{
 		PathPrefix: "/upload",
 		Dir:        uploadDir,
 	})
