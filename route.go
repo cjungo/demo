@@ -4,6 +4,8 @@ package main
 
 import (
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/cjungo/cjungo"
 	"github.com/cjungo/cjungo/ext"
@@ -37,11 +39,22 @@ func route(
 	employeeController *controller.EmployeeController,
 	productController *controller.ProductController,
 	instantController *controller.InstantController,
-) http.Handler {
+) (http.Handler, error) {
+	here, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
 	router.GET("/", indexController.Index)
 	router.GET("/status", indexController.Status)
 	router.POST("/login", loginController.Login)
 	router.GET("/captcha/math", captchaController.GenerateMath)
+
+	uploadDir := filepath.Join(here, "upload")
+	ext.StorageFor(router, logger, &ext.StorageConf{
+		PathPrefix: "/upload",
+		Dir:        uploadDir,
+	})
 
 	apiGroup := router.Group("/api")
 
@@ -66,5 +79,5 @@ func route(
 	productGroup.GET("/detail", productController.Detail, permitManager.Permit("product_find"))
 	productGroup.POST("/edit", productController.Edit, permitManager.Permit("product_add", "product_edit")) // OR
 
-	return router.GetHandler()
+	return router.GetHandler(), nil
 }

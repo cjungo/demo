@@ -1,0 +1,35 @@
+@host = http://127.0.0.1:12345
+
+###
+# @name upload
+POST {{host}}/upload HTTP/1.1
+Content-Type: multipart/form-data; boundary=aBoundaryString
+
+--aBoundaryString
+Content-Disposition: form-data; name="file"; filename="up2load5.png"
+Content-Type: image/png
+
+< ./upload.png
+--aBoundaryString--
+
+
+###
+# @name upload2
+POST {{host}}/upload/haha HTTP/1.1
+Content-Type: multipart/form-data; boundary=aBoundaryString
+
+--aBoundaryString
+Content-Disposition: form-data; name="file"; filename="up2load6.png"
+Content-Type: image/png
+
+< ./upload.png
+--aBoundaryString--
+
+###
+# @name query
+GET {{host}}/upload/upload.png HTTP/1.1
+
+
+### 
+# @name index
+GET {{host}}/upload HTTP/1.1
