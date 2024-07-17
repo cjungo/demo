@@ -32,8 +32,10 @@ func main() {
 			cjungo.LoadHttpServerConfFromEnv, // 加载服务器配置
 			cjungo.LoadTaskConfFromEnv,       // 加载队列配置
 			ext.NewStorageManager,            // 加载存储管理
-			ext.ProvideMessageController(func(ctx cjungo.HttpContext) (string, error) {
-				return ctx.GetReqID(), nil
+			ext.ProvideMessageController(&ext.MessageControllerProviderConf[string]{
+				TokenAccess: func(ctx cjungo.HttpContext) (string, error) {
+					return ctx.GetReqID(), nil
+				},
 			}),
 		); err != nil {
 			return err
