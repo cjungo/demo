@@ -14,6 +14,7 @@ var Permissions []localModel.CjPermission
 
 func init() {
 	Permissions = []localModel.CjPermission{
+		{ID: 10000, ParentID: 0, Tag: "default", Name: "基础权限"},
 		{ID: 11000, ParentID: 0, Tag: "employee", Name: "员工管理"},
 		{ID: 11001, ParentID: 11000, Tag: "employee_find", Name: "员工查看"},
 		{ID: 11002, ParentID: 11000, Tag: "employee_add", Name: "员工添加"},

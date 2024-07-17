@@ -40,6 +40,7 @@ func route(
 	employeeController *controller.EmployeeController,
 	productController *controller.ProductController,
 	instantController *controller.InstantController,
+	messageController *ext.MessageController[string],
 ) (http.Handler, error) {
 	here, err := os.Getwd()
 	if err != nil {
@@ -58,6 +59,9 @@ func route(
 	})
 
 	apiGroup := router.Group("/api")
+
+	// 消息
+	router.GET("/msg", messageController.Dispatch)
 
 	// instant
 	apiGroup.GET("/instant", instantController.Index)
