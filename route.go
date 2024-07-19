@@ -40,7 +40,7 @@ func route(
 	employeeController *controller.EmployeeController,
 	productController *controller.ProductController,
 	instantController *controller.InstantController,
-	messageController *ext.MessageController[string],
+	messageController *misc.MyMessageController,
 ) (http.Handler, error) {
 	here, err := os.Getwd()
 	if err != nil {

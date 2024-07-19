@@ -26,17 +26,13 @@ func init() {
 func main() {
 	app, err := cjungo.NewApplication(func(c cjungo.DiContainer) error {
 		if err := c.Provides(
-			cjungo.LoadLoggerConfFromEnv,     // 加载日志配置
-			db.LoadMySqlConfFormEnv,          // 加载 Mysql 配置
-			db.LoadSqliteConfFormEnv,         // 加载 Sqlite 配置
-			cjungo.LoadHttpServerConfFromEnv, // 加载服务器配置
-			cjungo.LoadTaskConfFromEnv,       // 加载队列配置
-			ext.NewStorageManager,            // 加载存储管理
-			ext.ProvideMessageController(&ext.MessageControllerProviderConf[string]{
-				TokenAccess: func(ctx cjungo.HttpContext) (string, error) {
-					return ctx.GetReqID(), nil
-				},
-			}),
+			cjungo.LoadLoggerConfFromEnv,      // 加载日志配置
+			db.LoadMySqlConfFormEnv,           // 加载 Mysql 配置
+			db.LoadSqliteConfFormEnv,          // 加载 Sqlite 配置
+			cjungo.LoadHttpServerConfFromEnv,  // 加载服务器配置
+			cjungo.LoadTaskConfFromEnv,        // 加载队列配置
+			ext.NewStorageManager,             // 加载存储管理
+			misc.ProvideMyMessageController(), // 加载 MyMessage 控制器
 		); err != nil {
 			return err
 		}
