@@ -12,6 +12,7 @@ import (
 	localModel "github.com/cjungo/demo/local/model"
 	"github.com/cjungo/demo/misc"
 	"github.com/cjungo/demo/model"
+	"github.com/rs/zerolog"
 	"gorm.io/gorm"
 
 	_ "github.com/cjungo/demo/docs"
@@ -34,6 +35,17 @@ func main() {
 			ext.NewStorageManager,             // 加载存储管理
 			misc.ProvideMyMessageController(), // 加载 MyMessage 控制器
 		); err != nil {
+			return err
+		}
+
+		// 执行一些操作。
+		if err := c.Invoke(func(logger *zerolog.Logger) {
+			logger.Info().
+				Str("action", "max").
+				Any("max", cjungo.Max(123, 456)).
+				Any("maxOf", cjungo.MaxOf(123, 4, 556, 767, 888, 222, 33, 1)).
+				Msg("[UTIL]")
+		}); err != nil {
 			return err
 		}
 
