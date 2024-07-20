@@ -41,9 +41,13 @@ func main() {
 		// 执行一些操作。
 		if err := c.Invoke(func(logger *zerolog.Logger) {
 			logger.Info().
-				Str("action", "max").
+				Str("action", "math").
 				Any("max", cjungo.Max(123, 456)).
 				Any("maxOf", cjungo.MaxOf(123, 4, 556, 767, 888, 222, 33, 1)).
+				Any("min", cjungo.Min(123, 345)).
+				Any("minOf", cjungo.MinOf(123, 445, 6532, 1, 343, -1)).
+				Any("limit", cjungo.Limit(1, 100, 200)).
+				Any("limitOf", cjungo.LimitOf(1, 100, 12, 235, 235, 47, 0, 6, 98, 23)).
 				Msg("[UTIL]")
 		}); err != nil {
 			return err
