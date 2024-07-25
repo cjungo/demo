@@ -24,6 +24,7 @@ var provideControllers = []any{
 	controller.NewEmployeeController,
 	controller.NewProductController,
 	ext.NewCaptchaController,
+	controller.NewSuggestController,
 	controller.NewInstantController,
 }
 
@@ -32,6 +33,7 @@ func route(
 	router cjungo.HttpRouter,
 	logger *zerolog.Logger,
 	storageManager *ext.StorageManager,
+	sseManager *ext.SseManager,
 	permitManager *mid.PermitManager[string, misc.EmployeeToken],
 	captchaController *ext.CaptchaController,
 	indexController *controller.IndexController,
@@ -41,11 +43,19 @@ func route(
 	productController *controller.ProductController,
 	instantController *controller.InstantController,
 	messageController *misc.MyMessageController,
+	suggestController *controller.SuggestController,
 ) (http.Handler, error) {
 	here, err := os.Getwd()
 	if err != nil {
 		return nil, err
 	}
+
+	router.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOriginFunc: func(origin string) (bool, error) {
+			return true, nil
+		},
+		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
+	}))
 
 	router.GET("/", indexController.Index)
 	router.GET("/status", indexController.Status)
@@ -59,6 +69,9 @@ func route(
 	})
 
 	apiGroup := router.Group("/api")
+
+	// 推荐
+	apiGroup.GET("/suggest", sseManager.Manage(suggestController))
 
 	// 消息
 	router.GET("/msg", messageController.Dispatch)
