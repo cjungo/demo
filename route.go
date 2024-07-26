@@ -33,7 +33,6 @@ func route(
 	router cjungo.HttpRouter,
 	logger *zerolog.Logger,
 	storageManager *ext.StorageManager,
-	sseManager *ext.SseManager,
 	permitManager *mid.PermitManager[string, misc.EmployeeToken],
 	captchaController *ext.CaptchaController,
 	indexController *controller.IndexController,
@@ -71,7 +70,7 @@ func route(
 	apiGroup := router.Group("/api")
 
 	// 推荐
-	apiGroup.GET("/suggest", sseManager.Manage(suggestController))
+	apiGroup.SSE("/suggest", suggestController.Index)
 
 	// 消息
 	router.GET("/msg", messageController.Dispatch)

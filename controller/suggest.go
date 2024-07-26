@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/cjungo/cjungo"
-	"github.com/cjungo/cjungo/ext"
 	"github.com/rs/zerolog"
 )
 
@@ -21,9 +20,9 @@ func NewSuggestController(
 	}
 }
 
-func (controller *SuggestController) SseDispatch(
+func (controller *SuggestController) Index(
 	ctx cjungo.HttpContext,
-	tx chan ext.SseEvent,
+	tx chan cjungo.SseEvent,
 	rx chan error,
 ) {
 	reqId := ctx.GetReqID()
@@ -40,9 +39,9 @@ func (controller *SuggestController) SseDispatch(
 				Msg("[SSE DEMO]")
 			return
 		case err := <-rx:
-			tx <- ext.SseEvent{Data: err}
+			tx <- cjungo.SseEvent{Data: err}
 		default:
-			tx <- ext.SseEvent{Data: fmt.Sprintf("tick: %s", reqId)}
+			tx <- cjungo.SseEvent{Data: fmt.Sprintf("tick: %s", reqId)}
 			controller.logger.Info().
 				Str("action", "tick").
 				Str("reqId", reqId).

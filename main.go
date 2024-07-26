@@ -33,7 +33,6 @@ func main() {
 			cjungo.LoadHttpServerConfFromEnv,  // 加载服务器配置
 			cjungo.LoadTaskConfFromEnv,        // 加载队列配置
 			ext.NewStorageManager,             // 加载存储管理
-			ext.NewSseManager,                 // SSE 管理器
 			misc.ProvideMyMessageController(), // 加载 MyMessage 控制器
 		); err != nil {
 			return err
