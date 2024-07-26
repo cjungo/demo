@@ -70,7 +70,9 @@ func route(
 	apiGroup := router.Group("/api")
 
 	// 推荐
-	apiGroup.SSE("/suggest", suggestController.Index)
+	suggestGroup := apiGroup.Group("/suggest")
+	suggestGroup.SSE("/index", suggestController.Index)
+	suggestGroup.LongPolling("/ago", suggestController.LongLongAgo)
 
 	// 消息
 	router.GET("/msg", messageController.Dispatch)
